@@ -219,7 +219,8 @@ def main():
         if len(sys.argv) > 1:
             filename = sys.argv[1]
         else:
-            answer = g.buttonbox("Would you like to condense one video or a folder of videos?", title, ["Video", "Folder"])
+            answer = g.buttonbox("Would you like to condense one video or a folder of videos?\n"
+                                 "(You can also drag and drop videos or folders directly to the executable or its shortcut)", title, ["Video", "Folder"])
             if answer == "Video":
                 filename = g.fileopenbox("Select video file", title, filetypes=[["*" + e for e in video_exts] + ["Video files"]])
             elif answer == "Folder":
