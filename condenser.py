@@ -8,6 +8,7 @@ from timeit import default_timer as timer
 import time
 import easygui as g
 import json
+import tempfile
 
 ffmpeg_cmd = "utils\\ffmpeg\\ffmpeg"
 ffprobe_cmd = "utils\\ffmpeg\\ffprobe"
@@ -81,12 +82,10 @@ def extract_audio_parts(periods, temp_dir, filename, audio_index):
     print("Extracting...")
     out_paths = []
     for i, (start, end) in enumerate(periods):
-        # out_path = temp_dir + "/out_{}.mkv".format(i)
         out_path = temp_dir + "\\out_{}.mp3".format(i)
         out_paths.append(out_path)
-        # command = "ffmpeg -hide_banner -loglevel error -i {} -ss {} -t {} -codec copy {}".format(
-        command = ffmpeg_cmd + ' -hide_banner -loglevel error -i "{}" -ss {} -t {} -map 0:a:{} -q:a 4 "{}"'.format(
-            filename, start / 1000, (end - start) / 1000, audio_index, out_path)
+        command = ffmpeg_cmd + ' -hide_banner -loglevel error -ss {} -i "{}" -t {} -map 0:a:{} -q:a 4 "{}"'.format(
+            start / 1000, filename, (end - start) / 1000, audio_index, out_path)
         rc = sp.call(command, shell=False)
         if rc != 0:
             raise Exception("Could not extract audio from video")
@@ -234,7 +233,7 @@ def main():
             print("Checking videos in folder:", filename)
 
             parent_folder, folder_name = op.split(filename)
-            temp_dir = op.join(parent_folder, "condenser_temp-{}".format(int(time.time() * 1000)))
+            temp_dir = op.join(tempfile.gettempdir(), "condenser_temp-{}".format(int(time.time() * 1000)))
 
             file_names = [f for f in os.listdir(filename) if op.isfile(op.join(filename, f))]
             video_names = [f for f in file_names if op.splitext(f)[1] in video_exts]
@@ -285,7 +284,7 @@ def main():
 
             file_root, _ = os.path.splitext(filename)
             file_folder, _ = os.path.split(filename)
-            temp_dir = op.join(file_folder, ".temp-{}".format(int(time.time() * 1000)))
+            temp_dir = op.join(tempfile.gettempdir(), ".temp-{}".format(int(time.time() * 1000)))
 
             audio_streams, subtitle_streams = probe_video(filename)
             os.makedirs(temp_dir)

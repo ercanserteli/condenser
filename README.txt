@@ -43,7 +43,7 @@ You can change some settings in config.json:
 "ask_when_multiple_srt" is False by default, which means it will pick the default (first) subtitle in a video file if it has multiple subtitles embedded. This is normally not a problem, but some videos may have strange subtitles put as the first one, such as "commentary" or "songs only". In this case, change this option to True and the program will ask which subtitle to use.
 
 
-Project Webpage
+Project Web Page
 ---------------
 Visit https://ercanserteli.com/condenser for further information and future updates
 
