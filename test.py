@@ -26,14 +26,14 @@ class TestSingles(unittest.TestCase):
         if delete_outputs:
             os.remove("test_vids\\3a1s_con.mp3")
 
-    def test3a2s(self):
-        result = sp.run(["python", "condenser.py", "test_vids\\3a2s.mkv"], capture_output=True)
-        msg = str(result.stdout) + "\n" + str(result.stderr)
-        self.assertEqual(result.returncode, 0, msg)
-        self.assertIn("Finished", str(result.stdout), msg)
-        print(result.stdout)
-        if delete_outputs:
-            os.remove("test_vids\\3a2s_con.mp3")
+    # def test3a2s(self):
+    #     result = sp.run(["python", "condenser.py", "test_vids\\3a2s.mkv"], capture_output=True)
+    #     msg = str(result.stdout) + "\n" + str(result.stderr)
+    #     self.assertEqual(result.returncode, 0, msg)
+    #     self.assertIn("Finished", str(result.stdout), msg)
+    #     print(result.stdout)
+    #     if delete_outputs:
+    #         os.remove("test_vids\\3a2s_con.mp3")
 
     def test1a0s(self):
         result = sp.run(["python", "condenser.py", "test_vids\\1a0s.mkv"], capture_output=True)
@@ -86,7 +86,8 @@ class TestMultis(unittest.TestCase):
         result = sp.run(["python", "condenser.py", "test_vids\\mix"], capture_output=True)
         msg = str(result.stdout) + "\n" + str(result.stderr)
         self.assertEqual(result.returncode, 0, msg)
-        self.assertIn("Videos in folder are not uniform", str(result.stdout), msg)
+        # self.assertIn("Videos in folder are not uniform", str(result.stdout), msg)
+        self.assertIn("Finished", str(result.stdout), msg)
         print(result.stdout)
         if delete_outputs:
             shutil.rmtree("test_vids\\mix_con", ignore_errors=True)

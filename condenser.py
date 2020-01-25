@@ -188,6 +188,45 @@ def condense(srt_path, padding, temp_dir, filename, audio_index, output_filename
     print("Finished in {:.2f} seconds".format(time_end - time_start))
 
 
+def condense_multi(subtitle_option, video_paths, video_names, subtitle_stream, audio_stream, mulsrt_ask, parent_folder,
+                   folder_name, temp_dir, padding):
+    all_subtitle_paths = None
+    if len(subtitle_option) == 0:
+        all_subtitle_paths = list(map(find_same_name_sub, video_paths))
+        if None in all_subtitle_paths:
+            raise Exception("There are videos with no subtitles and no corresponding subtitle files")
+
+    sub_index = choose_subtitle_stream(subtitle_stream, mulsrt_ask)
+    message = 'These files have multiple audio streams. Which one would you like to use?'
+    audio_index = choose_audio_stream(audio_stream, message)
+
+    output_dir = op.join(parent_folder, folder_name + "_con")
+    os.makedirs(output_dir, exist_ok=True)
+    all_time_start = timer()
+
+    for i in range(len(video_paths)):
+        v_path = video_paths[i]
+        v_root = op.splitext(video_names[i])[0]
+        output_filename = v_root + ".mp3"
+        output_filepath = op.join(output_dir, output_filename)
+        if op.isfile(output_filepath):
+            print("{} already exists. Skipping".format(output_filename))
+            continue
+
+        print("Condensing video " + str(i + 1))
+        os.makedirs(temp_dir, exist_ok=True)
+        if all_subtitle_paths:
+            srt_path = all_subtitle_paths[i]
+        else:
+            srt_path = extract_srt(temp_dir, v_path, sub_index)
+        condense(srt_path, padding, temp_dir, v_path, audio_index, output_filepath)
+
+        shutil.rmtree(temp_dir, ignore_errors=True)
+
+    all_time_end = timer()
+    print("Finished {} files in {:.2f} seconds".format(len(video_paths), all_time_end - all_time_start))
+
+
 def main():
     temp_dir = None
     filename = None
@@ -246,44 +285,34 @@ def main():
             all_subtitle_options = list(map(streams_to_options, all_subtitle_streams))
             if check_all_equal(all_audio_options) and check_all_equal(all_subtitle_options):
                 print("Streams are consistent")
-
-                all_subtitle_paths = None
-                if len(all_subtitle_options[0]) == 0:
-                    all_subtitle_paths = list(map(find_same_name_sub, video_paths))
-                    if None in all_subtitle_paths:
-                        raise Exception("There are videos with no subtitles and no corresponding subtitle files")
-
-                sub_index = choose_subtitle_stream(all_subtitle_streams[0], mulsrt_ask)
-                message = 'These files have multiple audio streams. Which one would you like to use?'
-                audio_index = choose_audio_stream(all_audio_streams[0], message)
-
-                output_dir = op.join(parent_folder, folder_name + "_con")
-                os.makedirs(output_dir)
-                all_time_start = timer()
-
-                for i in range(len(video_paths)):
-                    print("Condensing video " + str(i+1))
-                    os.makedirs(temp_dir)
-
-                    v_path = video_paths[i]
-                    v_root = op.splitext(video_names[i])[0]
-                    if all_subtitle_paths:
-                        srt_path = all_subtitle_paths[i]
-                    else:
-                        srt_path = extract_srt(temp_dir, v_path, sub_index)
-                    condense(srt_path, padding, temp_dir, v_path, audio_index, op.join(output_dir, v_root + ".mp3"))
-
-                    shutil.rmtree(temp_dir, ignore_errors=True)
-
-                all_time_end = timer()
-                print("Finished {} files in {:.2f} seconds".format(len(all_audio_streams), all_time_end - all_time_start))
+                condense_multi(all_subtitle_options[0], video_paths, video_names, all_subtitle_streams[0],
+                               all_audio_streams[0], mulsrt_ask, parent_folder, folder_name, temp_dir, padding)
             else:
-                raise Exception("Videos in folder are not uniform")
+                all_options = list(zip(all_audio_options, all_subtitle_options))
+                grouped_options = [[(0, all_options[0])]]
+                for i, o in enumerate(all_options[1:]):
+                    found = False
+                    for go in grouped_options:
+                        if go[0][1] == o:
+                            go.append((i+1, o))
+                            found = True
+                            break
+                    if not found:
+                        grouped_options.append([(i+1, o)])
+
+                for go in grouped_options:
+                    ids = [i for i, o in go]
+                    so = go[0][1][1]
+                    vps = [video_paths[i] for i in ids]
+                    vns = [video_names[i] for i in ids]
+                    s_s = all_subtitle_streams[ids[0]]
+                    a_s = all_audio_streams[ids[0]]
+                    condense_multi(so, vps, vns, s_s, a_s, mulsrt_ask, parent_folder, folder_name, temp_dir, padding)
         else:
             print("Opening video:", filename)
 
-            file_root, _ = os.path.splitext(filename)
-            file_folder, _ = os.path.split(filename)
+            file_root, s_s = os.path.splitext(filename)
+            file_folder, s_s = os.path.split(filename)
             temp_dir = op.join(tempfile.gettempdir(), ".temp-{}".format(int(time.time() * 1000)))
 
             audio_streams, subtitle_streams = probe_video(filename)
