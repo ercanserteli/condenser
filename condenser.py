@@ -151,29 +151,32 @@ def find_same_name_sub(filename):
 
 
 def get_srt(subtitle_streams, mulsrt_ask, file_folder, filename, temp_dir):
-    if len(subtitle_streams) < 1:
-        sub_path = find_same_name_sub(filename)
+    sub_path = find_same_name_sub(filename)
 
-        if sub_path is None:
-            # No same-name sub, asking the user
+    if sub_path is None:
+        # No same-name subs
+
+        if len(subtitle_streams) >= 1:
+            # Video has subtitles
+            sub_index = choose_subtitle_stream(subtitle_streams, mulsrt_ask)
+            srt_path = extract_srt(temp_dir, filename, sub_index)
+            return srt_path
+        else:
+            # No subs in video either, asking the user
             sub_path = g.fileopenbox("This video file has no subtitles. Select a subtitle file to continue",
                                      title, filetypes=[sub_exts], default="{}\\*".format(file_folder))
             if sub_path is None:
                 raise Exception("Video file has no subtitles and subtitle file not selected. Exiting program.")
 
-        sub_root, sub_ext = op.splitext(sub_path)
-        if sub_ext.lower() != ".srt":
-            srt_path = op.join(temp_dir, "out.srt")
-            sub_convert_cmd = ["ffmpeg", "-i", sub_path, srt_path]
-            result = sp.run(sub_convert_cmd, capture_output=True)
-            if result.returncode != 0:
-                raise Exception("Could not open subtitle file " + sub_path + ": " + str(result.stderr))
-        else:
-            srt_path = sub_path
+    sub_root, sub_ext = op.splitext(sub_path)
+    if sub_ext.lower() != ".srt":
+        srt_path = op.join(temp_dir, "out.srt")
+        sub_convert_cmd = [ffmpeg_cmd, "-i", sub_path, srt_path]
+        result = sp.run(sub_convert_cmd, capture_output=True)
+        if result.returncode != 0:
+            raise Exception("Could not open subtitle file " + sub_path + ": " + str(result.stderr))
     else:
-        # Video has subtitles
-        sub_index = choose_subtitle_stream(subtitle_streams, mulsrt_ask)
-        srt_path = extract_srt(temp_dir, filename, sub_index)
+        srt_path = sub_path
     return srt_path
 
 
@@ -190,10 +193,9 @@ def condense(srt_path, padding, temp_dir, filename, audio_index, output_filename
 
 def condense_multi(subtitle_option, video_paths, video_names, subtitle_stream, audio_stream, mulsrt_ask, parent_folder,
                    folder_name, temp_dir, padding):
-    all_subtitle_paths = None
-    if len(subtitle_option) == 0:
-        all_subtitle_paths = list(map(find_same_name_sub, video_paths))
-        if None in all_subtitle_paths:
+    all_subtitle_paths = list(map(find_same_name_sub, video_paths))
+    if None in all_subtitle_paths:
+        if len(subtitle_option) == 0:
             raise Exception("There are videos with no subtitles and no corresponding subtitle files")
 
     sub_index = choose_subtitle_stream(subtitle_stream, mulsrt_ask)
@@ -215,7 +217,7 @@ def condense_multi(subtitle_option, video_paths, video_names, subtitle_stream, a
 
         print("Condensing video " + str(i + 1))
         os.makedirs(temp_dir, exist_ok=True)
-        if all_subtitle_paths:
+        if all_subtitle_paths and all_subtitle_paths[i]:
             srt_path = all_subtitle_paths[i]
         else:
             srt_path = extract_srt(temp_dir, v_path, sub_index)
@@ -324,11 +326,13 @@ def main():
             condense(srt_path, padding, temp_dir, filename, audio_index, file_root + "_con.mp3")
 
     except Exception as ex:
-        print(ex)
+        print("{}: {}".format(type(ex).__name__, ex))
+        import traceback
+        print(traceback.format_exc())
         with open(op.join(application_path, "log.txt"), "a") as f:
             time_str = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
             heading = time_str + " - " + filename
-            message = heading + "\n" + "-"*len(heading) + "\n" + str(ex) + "\n\n"
+            message = heading + "\n" + "-"*len(heading) + "\n" + str(ex) + "\nTraceback:\n" + traceback.format_exc() + "\n\n"
             f.write(message)
         # os.system("pause")
 

@@ -1,4 +1,4 @@
 {
   "padding": 500,
-  "ask_when_multiple_srt": false
+  "ask_when_multiple_srt": true
 }
