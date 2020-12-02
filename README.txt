@@ -1,10 +1,10 @@
-Condenser by Ercan Serteli
---------------------------
+Condenser v1.2.1 by Ercan Serteli
+---------------------------------
 
 
 What is this?
 -------------
-Condenser allows you to extract speech audio from video files, based on subtitle timings. This is mainly supposed to be used for passive immersion, where you are listening to the audio of something you have already watched. By omitting the audio outside of speech, it increases the language per second that you are getting exposed to. 
+Condenser allows you to extract speech audio from video files, based on subtitle timings. This is mainly supposed to be used for passive immersion, where you are listening to the audio of something you have already watched. By omitting the audio outside of speech, it increases the language per second that you are getting exposed to.
 
 
 How to use - Simple
@@ -51,3 +51,15 @@ Visit https://ercanserteli.com/condenser for further information and future upda
 Acknowledgements
 ----------------
 Condenser uses ffmpeg for manipulating video and audio files.
+
+Change log
+----------
+v1.2.1
+  * Improved error logging
+  * Fixed a bug with non-srt subtitle files
+
+v1.2
+  * Changed to prioritize external subtitles over internal ones
+
+v1.1
+  * Changed the audio extraction stage to be much faster, especially for long videos

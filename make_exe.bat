@@ -8,3 +8,5 @@ del dist\condenser\_lzma.pyd
 del dist\condenser\unicodedata.pyd
 del dist\condenser\libcrypto-1_1-x64.dll
 del dist\condenser\libssl-1_1-x64.dll
+del dist\condenser\ucrtbase.dll
+del dist\condenser\api-ms-win-*
