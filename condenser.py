@@ -12,7 +12,8 @@ import tempfile
 
 ffmpeg_cmd = "utils\\ffmpeg\\ffmpeg"
 ffprobe_cmd = "utils\\ffmpeg\\ffprobe"
-video_exts = [".mkv", ".mp4", ".webm", ".mpg", ".mp2", ".mpeg", ".mpe", ".mpv", ".ogg", ".m4p", ".m4v", ".avi", ".wmv", ".mov", ".qt", ".flv", ".swf"]
+video_exts = [".mkv", ".mp4", ".webm", ".mpg", ".mp2", ".mpeg", ".mpe", ".mpv", ".ogg", ".m4p",
+              ".m4v", ".avi", ".wmv", ".mov", ".qt", ".flv", ".swf", ".mp3"]
 sub_exts = ["*.srt", "*.ass", "*.ssa", "Subtitle files"]
 title = "Condenser"
 
@@ -168,6 +169,9 @@ def get_srt(subtitle_streams, mulsrt_ask, file_folder, filename, temp_dir):
             if sub_path is None:
                 raise Exception("Video file has no subtitles and subtitle file not selected. Exiting program.")
 
+    return convert_sub_if_needed(sub_path, temp_dir)
+
+def convert_sub_if_needed(sub_path, temp_dir):
     sub_root, sub_ext = op.splitext(sub_path)
     if sub_ext.lower() != ".srt":
         srt_path = op.join(temp_dir, "out.srt")
@@ -218,7 +222,7 @@ def condense_multi(subtitle_option, video_paths, video_names, subtitle_stream, a
         print("Condensing video " + str(i + 1))
         os.makedirs(temp_dir, exist_ok=True)
         if all_subtitle_paths and all_subtitle_paths[i]:
-            srt_path = all_subtitle_paths[i]
+            srt_path = convert_sub_if_needed(all_subtitle_paths[i], temp_dir)
         else:
             srt_path = extract_srt(temp_dir, v_path, sub_index)
         condense(srt_path, padding, temp_dir, v_path, audio_index, output_filepath)
@@ -313,8 +317,8 @@ def main():
         else:
             print("Opening video:", filename)
 
-            file_root, s_s = os.path.splitext(filename)
-            file_folder, s_s = os.path.split(filename)
+            file_root, _ = os.path.splitext(filename)
+            file_folder, _ = os.path.split(filename)
             temp_dir = op.join(tempfile.gettempdir(), ".temp-{}".format(int(time.time() * 1000)))
 
             audio_streams, subtitle_streams = probe_video(filename)

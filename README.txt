@@ -1,4 +1,4 @@
-Condenser v1.2.1 by Ercan Serteli
+Condenser v1.2.2 by Ercan Serteli
 ---------------------------------
 
 
@@ -54,6 +54,10 @@ Condenser uses ffmpeg for manipulating video and audio files.
 
 Change log
 ----------
+v1.2.2
+  * Fixed a bug with mp3 files as input
+  * Fixed a bug with non-srt subtitle files when condensing a folder
+
 v1.2.1
   * Improved error logging
   * Fixed a bug with non-srt subtitle files
