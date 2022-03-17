@@ -9,6 +9,7 @@ import time
 import easygui as g
 import json
 import tempfile
+import re
 
 ffmpeg_cmd = "utils\\ffmpeg\\ffmpeg"
 ffprobe_cmd = "utils\\ffmpeg\\ffprobe"
@@ -16,6 +17,8 @@ video_exts = [".mkv", ".mp4", ".webm", ".mpg", ".mp2", ".mpeg", ".mpe", ".mpv", 
               ".m4v", ".avi", ".wmv", ".mov", ".qt", ".flv", ".swf", ".mp3"]
 sub_exts = ["*.srt", "*.ass", "*.ssa", "Subtitle files"]
 title = "Condenser"
+filtered_chars = ""
+filter_parentheses = False
 
 
 def check_all_equal(l):
@@ -49,12 +52,28 @@ def streams_to_options(streams):
     return options
 
 
+def filter_text(text):
+    text = re.sub('<[^<]+?>', '', text)  # strip xml tags
+    if filter_parentheses and \
+            ((text[0] == "(" and text[-1] == ")") or \
+             (text[0] == "[" and text[-1] == "]") or \
+             (text[0] == "{" and text[-1] == "}")):
+        return ""
+    else:
+        if filtered_chars:
+            return text.translate(str.maketrans('', '', filtered_chars))
+        else:
+            return text
+
+
 def extract_periods(srt_path, padding):
-    sub_filter = ["♬", "♬～"]
     subs = pysrt.open(srt_path)
     if not subs:
         raise Exception("Could not open the subtitle file: " + srt_path)
-    periods = [[sub.start.ordinal - padding, sub.end.ordinal + padding] for sub in subs if sub.text not in sub_filter]
+    if filtered_chars or filter_parentheses:
+        for sub in subs:
+            sub.text = filter_text(sub.text)
+    periods = [[sub.start.ordinal - padding, sub.end.ordinal + padding] for sub in subs if len(sub.text) > 0]
 
     if periods[0][0] < 0:
         periods[0][0] = 0
@@ -74,7 +93,7 @@ def extract_periods(srt_path, padding):
         merged_periods.append(periods[i])
         i += (expanded + 1)
 
-    print("All period count:", len(periods))
+    print("All period count: {} ({} filtered)".format(len(periods), len(subs) - len(periods)))
     print("Merged period count:", len(merged_periods))
     return merged_periods
 
@@ -120,11 +139,11 @@ def choose_audio_stream(audio_streams, message):
     return audio_index
 
 
-def choose_subtitle_stream(subtitle_streams, mulsrt_ask):
+def choose_subtitle_stream(subtitle_streams, mulsrt_ask, file_name_str="this file"):
     sub_index = 0
     if len(subtitle_streams) > 1 and mulsrt_ask:
         sub_options = streams_to_options(subtitle_streams)
-        sub_index = g.indexbox('This file has multiple subtitles. Which one would you like to use?'
+        sub_index = g.indexbox('No external and multiple internal subtitles found in {}. Which one would you like to use?'.format(file_name_str) +
                                ' If you want to always pick the first subtitle by default,'
                                ' set "ask_when_multiple_srt" to False in config.json',
                                'Subtitle Stream', sub_options, default_choice=sub_options[sub_index],
@@ -199,10 +218,14 @@ def condense_multi(subtitle_option, video_paths, video_names, subtitle_stream, a
                    folder_name, temp_dir, padding):
     all_subtitle_paths = list(map(find_same_name_sub, video_paths))
     if None in all_subtitle_paths:
+        # There is at least one video with no external sub
         if len(subtitle_option) == 0:
+            # There are no internal subs
             raise Exception("There are videos with no subtitles and no corresponding subtitle files")
+        is_all_none = all(s is None for s in all_subtitle_paths)
+        file_name_str = "all files" if is_all_none else "some files"
+        sub_index = choose_subtitle_stream(subtitle_stream, mulsrt_ask, file_name_str)
 
-    sub_index = choose_subtitle_stream(subtitle_stream, mulsrt_ask)
     message = 'These files have multiple audio streams. Which one would you like to use?'
     audio_index = choose_audio_stream(audio_stream, message)
 
@@ -245,10 +268,12 @@ def main():
         # Load config
         config_path = op.join(application_path, "config.json")
         if op.isfile(config_path):
-            with open(config_path, "r") as f:
+            with open(config_path, "r", encoding="utf8") as f:
                 conf = json.load(f)
                 padding = conf.get("padding")
                 mulsrt_ask = conf.get("ask_when_multiple_srt")
+                global filtered_chars; filtered_chars = conf.get("filtered_characters")
+                global filter_parentheses; filter_parentheses = conf.get("filter_parentheses")
                 if type(padding) is not int or type(mulsrt_ask) is not bool:
                     raise Exception("Invalid config file")
                 if padding < 0:

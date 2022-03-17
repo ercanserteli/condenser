@@ -1,4 +1,4 @@
-Condenser v1.2.2 by Ercan Serteli
+Condenser v1.3.0 by Ercan Serteli
 ---------------------------------
 
 
@@ -42,6 +42,9 @@ You can change some settings in config.json:
 
 "ask_when_multiple_srt" is False by default, which means it will pick the default (first) subtitle in a video file if it has multiple subtitles embedded. This is normally not a problem, but some videos may have strange subtitles put as the first one, such as "commentary" or "songs only". In this case, change this option to True and the program will ask which subtitle to use.
 
+"filtered_characters" is a set of characters to filter. If a subtitle line consists only of these characters, that line is ignored in the output.
+
+"filter_parentheses" is True by default, which means it ignores subtitle lines that are completely enclosed in parentheses (including brackets and curly braces)
 
 Project Web Page
 ---------------
@@ -54,6 +57,10 @@ Condenser uses ffmpeg for manipulating video and audio files.
 
 Change log
 ----------
+v1.3.0
+  * Fixed a bug with external subtitles when condensing a folder
+  * Added the ability to filter certain characters and lines enclosed by parentheses in subtitles, set by config
+
 v1.2.2
   * Fixed a bug with mp3 files as input
   * Fixed a bug with non-srt subtitle files when condensing a folder
