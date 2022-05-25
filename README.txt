@@ -1,4 +1,4 @@
-Condenser v1.3.0 by Ercan Serteli
+Condenser v1.3.1 by Ercan Serteli
 ---------------------------------
 
 
@@ -11,7 +11,7 @@ How to use - Simple
 -------------------
 * Unpack the archive to a folder and create a shortcut to condenser.exe if you want.
 * Drag and drop a video or a folder with videos to the executable (or its shortcut).
-* If there is an ambiguity, a pop up may ask you to make a choice. Answer accordingly.
+* If there is an ambiguity, a pop-up may ask you to make a choice. Answer accordingly.
 * When the processing is done, an audio file with the name "[video_name]_con.mp3" will be created next to the video.
 
 
@@ -57,6 +57,9 @@ Condenser uses ffmpeg for manipulating video and audio files.
 
 Change log
 ----------
+v1.3.1
+  * Fixed a bug with subtitles where some lines can be empty after filtering
+
 v1.3.0
   * Fixed a bug with external subtitles when condensing a folder
   * Added the ability to filter certain characters and lines enclosed by parentheses in subtitles, set by config

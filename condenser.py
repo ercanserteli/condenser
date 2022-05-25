@@ -54,6 +54,8 @@ def streams_to_options(streams):
 
 def filter_text(text):
     text = re.sub('<[^<]+?>', '', text)  # strip xml tags
+    if len(text) == 0:
+        return ""
     if filter_parentheses and \
             ((text[0] == "(" and text[-1] == ")") or \
              (text[0] == "[" and text[-1] == "]") or \
