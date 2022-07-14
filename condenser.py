@@ -19,6 +19,7 @@ sub_exts = ["*.srt", "*.ass", "*.ssa", "Subtitle files"]
 title = "Condenser"
 filtered_chars = ""
 filter_parentheses = False
+output_format = ""
 
 
 def check_all_equal(l):
@@ -26,8 +27,7 @@ def check_all_equal(l):
 
 
 def probe_video(filename):
-    result = sp.run(ffprobe_cmd + ' -show_streams -v quiet -print_format json "{}"'.format(filename),
-                    capture_output=True)
+    result = sp.run(ffprobe_cmd + ' -show_streams -v quiet -print_format json "{}"'.format(filename), capture_output=True)
     if result.returncode != 0:
         raise Exception("Could not probe video with ffprobe: " + str(result.stderr))
     probe = json.loads(result.stdout)
@@ -104,9 +104,10 @@ def extract_audio_parts(periods, temp_dir, filename, audio_index):
     print("Extracting...")
     out_paths = []
     for i, (start, end) in enumerate(periods):
-        out_path = temp_dir + "\\out_{}.mp3".format(i)
+        out_path = temp_dir + "\\out_{}.flac".format(i)
         out_paths.append(out_path)
-        command = ffmpeg_cmd + ' -hide_banner -loglevel error -ss {} -i "{}" -t {} -map 0:a:{} -q:a 4 "{}"'.format(
+        
+        command = ffmpeg_cmd + ' -hide_banner -loglevel error -ss {} -i "{}" -t {} -map 0:a:{} -c:a flac -compression_level 0 "{}"'.format(
             start / 1000, filename, (end - start) / 1000, audio_index, out_path)
         rc = sp.call(command, shell=False)
         if rc != 0:
@@ -124,7 +125,7 @@ def concatenate_audio_parts(periods, temp_dir, out_paths, output_filename):
 
     print("Concatenating...")
     concat_commands = [ffmpeg_cmd, "-y", "-safe", "0", "-hide_banner", "-loglevel", "error", "-f", "concat", "-i",
-                       concat_dir, "-codec", "copy", output_filename]
+                       concat_dir, output_filename]
     result = sp.run(concat_commands, capture_output=True)
     if result.returncode != 0:
         raise Exception("There was a problem during concatenation: " + str(result.stderr))
@@ -238,7 +239,7 @@ def condense_multi(subtitle_option, video_paths, video_names, subtitle_stream, a
     for i in range(len(video_paths)):
         v_path = video_paths[i]
         v_root = op.splitext(video_names[i])[0]
-        output_filename = v_root + ".mp3"
+        output_filename = v_root + ".flac"
         output_filepath = op.join(output_dir, output_filename)
         if op.isfile(output_filepath):
             print("{} already exists. Skipping".format(output_filename))
@@ -276,6 +277,7 @@ def main():
                 mulsrt_ask = conf.get("ask_when_multiple_srt")
                 global filtered_chars; filtered_chars = conf.get("filtered_characters")
                 global filter_parentheses; filter_parentheses = conf.get("filter_parentheses")
+                global output_format; output_format = conf.get("output_format")
                 if type(padding) is not int or type(mulsrt_ask) is not bool:
                     raise Exception("Invalid config file")
                 if padding < 0:
@@ -354,7 +356,7 @@ def main():
             audio_index = choose_audio_stream(audio_streams,
                                               'This file has multiple audio streams. Which one would you like to use?')
 
-            condense(srt_path, padding, temp_dir, filename, audio_index, file_root + "_con.mp3")
+            condense(srt_path, padding, temp_dir, filename, audio_index, file_root + "_con." + output_format)
 
     except Exception as ex:
         print("{}: {}".format(type(ex).__name__, ex))
