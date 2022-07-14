@@ -59,6 +59,9 @@ Condenser uses ffmpeg for manipulating video and audio files.
 
 Change log
 ----------
+v1.4.0
+  * Added the ability to control output file format, set by config
+
 v1.3.1
   * Fixed a bug with subtitles where some lines can be empty after filtering
 
