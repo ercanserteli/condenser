@@ -46,6 +46,8 @@ You can change some settings in config.json:
 
 "filter_parentheses" is True by default, which means it ignores subtitle lines that are completely enclosed in parentheses (including brackets and curly braces)
 
+"output_format" is set to "mp3" by default, but supports every output format supported by ffmpeg. Formats of note are "flac" as it is lossless, and "aac" since it supports higher quality audio at the same file size as mp3. For a complete list see ffmpeg's documentation.
+
 Project Web Page
 ---------------
 Visit https://ercanserteli.com/condenser for further information and future updates
