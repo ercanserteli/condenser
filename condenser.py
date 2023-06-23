@@ -58,6 +58,7 @@ def filter_text(text):
         return ""
     if filter_parentheses and \
             ((text[0] == "(" and text[-1] == ")") or \
+             (text[0] == "（" and text[-1] == "）") or \
              (text[0] == "[" and text[-1] == "]") or \
              (text[0] == "{" and text[-1] == "}")):
         return ""
