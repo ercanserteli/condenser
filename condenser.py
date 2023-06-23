@@ -165,7 +165,7 @@ def find_same_name_sub(filename):
     # Checking if a subtitle file exists with the same name as the video file
     file_root, _ = op.splitext(filename)
     for e in sub_exts[:-1]:
-        path = file_root + e[1:]
+        path = file_root + sub_suffix + e[1:]
         if op.isfile(path):
             return path
     return None
@@ -275,6 +275,7 @@ def main():
                 mulsrt_ask = conf.get("ask_when_multiple_srt")
                 global filtered_chars; filtered_chars = conf.get("filtered_characters")
                 global filter_parentheses; filter_parentheses = conf.get("filter_parentheses")
+                global sub_suffix; sub_suffix = conf.get("sub_suffix")
                 if type(padding) is not int or type(mulsrt_ask) is not bool:
                     raise Exception("Invalid config file")
                 if padding < 0:
