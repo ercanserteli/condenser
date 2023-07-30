@@ -11,8 +11,8 @@ import json
 import tempfile
 import re
 
-ffmpeg_cmd = "utils\\ffmpeg\\ffmpeg"
-ffprobe_cmd = "utils\\ffmpeg\\ffprobe"
+ffmpeg_cmd = "utils/ffmpeg/ffmpeg"
+ffprobe_cmd = "utils/ffmpeg/ffprobe"
 video_exts = [".mkv", ".mp4", ".webm", ".mpg", ".mp2", ".mpeg", ".mpe", ".mpv", ".ogg", ".m4p",
               ".m4v", ".avi", ".wmv", ".mov", ".qt", ".flv", ".swf", ".mp3"]
 sub_exts = ["*.srt", "*.ass", "*.ssa", "Subtitle files"]
@@ -27,7 +27,8 @@ def check_all_equal(l):
 
 
 def probe_video(filename):
-    result = sp.run(ffprobe_cmd + ' -show_streams -v quiet -print_format json "{}"'.format(filename), capture_output=True)
+    result = sp.run([ffprobe_cmd, "-show_streams", "-v", "quiet", "-print_format", "json", filename],
+                    capture_output=True)
     if result.returncode != 0:
         raise Exception("Could not probe video with ffprobe: " + str(result.stderr))
     probe = json.loads(result.stdout)
@@ -104,11 +105,9 @@ def extract_audio_parts(periods, temp_dir, filename, audio_index):
     print("Extracting...")
     out_paths = []
     for i, (start, end) in enumerate(periods):
-        out_path = temp_dir + "\\out_{}.flac".format(i)
+        out_path = temp_dir + "/out_{}.flac".format(i)
         out_paths.append(out_path)
-        
-        command = ffmpeg_cmd + ' -hide_banner -loglevel error -ss {} -i "{}" -t {} -map 0:a:{} -c:a flac -compression_level 0 "{}"'.format(
-            start / 1000, filename, (end - start) / 1000, audio_index, out_path)
+        command = [ffmpeg_cmd, '-hide_banner', '-loglevel', 'error', '-ss', str(start / 1000), '-i', filename, '-t', str((end - start) / 1000), '-map', '0:a:{}'.format(audio_index), '-c:a', 'flac', '-compression_level', '0', out_path]
         rc = sp.call(command, shell=False)
         if rc != 0:
             raise Exception("Could not extract audio from video")
@@ -156,8 +155,8 @@ def choose_subtitle_stream(subtitle_streams, mulsrt_ask, file_name_str="this fil
 
 def extract_srt(temp_dir, filename, sub_index):
     srt_path = op.join(temp_dir, "out.srt")
-    result = sp.run(ffmpeg_cmd + ' -hide_banner -loglevel error -i "{}" -map 0:s:{} "{}"'.
-                    format(filename, sub_index, srt_path), capture_output=True)
+    result = sp.run([ffmpeg_cmd, '-hide_banner', '-loglevel', 'error', '-i', filename, '-map',
+                    '0:s:{}'.format(sub_index), srt_path], capture_output=True)
     if result.returncode != 0:
         raise Exception("Could not extract subtitle with ffmpeg: " + str(result.stderr))
     return srt_path
@@ -187,7 +186,7 @@ def get_srt(subtitle_streams, mulsrt_ask, file_folder, filename, temp_dir):
         else:
             # No subs in video either, asking the user
             sub_path = g.fileopenbox("This video file has no subtitles. Select a subtitle file to continue",
-                                     title, filetypes=[sub_exts], default="{}\\*".format(file_folder))
+                                     title, filetypes=[sub_exts], default="{}/*".format(file_folder))
             if sub_path is None:
                 raise Exception("Video file has no subtitles and subtitle file not selected. Exiting program.")
 
@@ -239,7 +238,7 @@ def condense_multi(subtitle_option, video_paths, video_names, subtitle_stream, a
     for i in range(len(video_paths)):
         v_path = video_paths[i]
         v_root = op.splitext(video_names[i])[0]
-        output_filename = v_root + ".flac"
+        output_filename = v_root + "." + output_format
         output_filepath = op.join(output_dir, output_filename)
         if op.isfile(output_filepath):
             print("{} already exists. Skipping".format(output_filename))
