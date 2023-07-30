@@ -20,6 +20,7 @@ title = "Condenser"
 filtered_chars = ""
 filter_parentheses = False
 output_format = ""
+sub_suffix = ""
 
 
 def check_all_equal(li):
@@ -59,6 +60,7 @@ def filter_text(text):
         return ""
     if filter_parentheses and \
             ((text[0] == "(" and text[-1] == ")") or
+             (text[0] == "（" and text[-1] == "）") or
              (text[0] == "[" and text[-1] == "]") or
              (text[0] == "{" and text[-1] == "}")):
         return ""
@@ -170,7 +172,7 @@ def find_same_name_sub(filename):
     # Checking if a subtitle file exists with the same name as the video file
     file_root, _ = op.splitext(filename)
     for e in sub_exts[:-1]:
-        path = file_root + e[1:]
+        path = file_root + sub_suffix + e[1:]
         if op.isfile(path):
             return path
     return None
@@ -286,6 +288,8 @@ def main():
                 filter_parentheses = conf.get("filter_parentheses")
                 global output_format
                 output_format = conf.get("output_format")
+                global sub_suffix;
+                sub_suffix = conf.get("sub_suffix")
                 if type(padding) is not int or type(mulsrt_ask) is not bool:
                     raise Exception("Invalid config file")
                 if padding < 0:

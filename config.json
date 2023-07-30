@@ -3,5 +3,6 @@
   "ask_when_multiple_srt": true,
   "filtered_characters": "♩♪♫♬～",
   "filter_parentheses": true,
-  "output_format": "mp3"
+  "output_format": "mp3",
+  "sub_suffix": ""
 }
