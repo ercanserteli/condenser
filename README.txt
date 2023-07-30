@@ -1,4 +1,4 @@
-Condenser v1.3.1 by Ercan Serteli
+Condenser v1.4.0 by Ercan Serteli
 ---------------------------------
 
 
