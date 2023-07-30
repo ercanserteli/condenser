@@ -2,5 +2,6 @@
   "padding": 500,
   "ask_when_multiple_srt": true,
   "filtered_characters": "♩♪♫♬～",
-  "filter_parentheses": true
+  "filter_parentheses": true,
+  "output_format": "mp3"
 }
