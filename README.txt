@@ -10,7 +10,7 @@ Condenser allows you to extract speech audio from video files, based on subtitle
 How to use - Simple
 -------------------
 * Unpack the archive to a folder and create a shortcut to condenser.exe if you want.
-* Drag and drop a video or a folder with videos to the executable (or its shortcut).
+* Drag and drop a video (or audio) or a folder with videos to the executable (or its shortcut).
 * If there is an ambiguity, a pop-up may ask you to make a choice. Answer accordingly.
 * When the processing is done, an audio file with the name "[video_name]_con.mp3" will be created next to the video.
 
@@ -19,7 +19,7 @@ How to use - Detailed
 ---------------------
 * Unpack the archive to a folder and create a shortcut to condenser.exe if you want.
 * Single file:
-    * Drag and drop a video to the executable (or its shortcut) or double click to run it and choose "Video" to select a file.
+    * Drag and drop a video (or audio) to the executable (or its shortcut) or double click to run it and choose "Video" to select a file.
     * If the video has no embedded subtitles, it will look for a subtitle file of the same name in the same directory.
     * If it cannot find a suitable subtitle file either, it will ask you to select a subtitle file.
     * If there are multiple audio streams in the video file, it will ask you to pick one.
@@ -27,7 +27,7 @@ How to use - Detailed
     * If an error occurs, the error message is written to a log.txt file in the executable directory.
 * Folder:
     * Drag and drop a folder with videos to the executable (or its shortcut) or double click to run it and choose "Folder" to select a folder.
-    * All of the video files in the folder must have the same group of audio and subtitle streams for this to work.
+    * All the video files in the folder must have the same group of audio and subtitle streams for this to work.
     * If the videos don't have embedded subtitles, it will look for a subtitle file of the same name for each video file.
     * If it cannot find suitable subtitle files either, the program will exit (it won't ask you to select a subtitle for every single video).
     * If there are multiple audio streams in the video files, it will ask you to pick one.
@@ -48,6 +48,8 @@ You can change some settings in config.json:
 
 "output_format" is set to "mp3" by default, but supports every output format supported by ffmpeg. Formats of note are "flac" as it is lossless, and "aac" since it supports higher quality audio at the same file size as mp3. For a complete list see ffmpeg's documentation.
 
+"sub_suffix" is empty by default. If your external subs have a suffix by default (e.g. "[video_name]_retimed.srt" or "[video_name]_en.srt"), you can set it here (e.g. "_retimed" or "_en") so that the program can find the subtitle file automatically.
+
 Project Web Page
 ---------------
 Visit https://ercanserteli.com/condenser for further information and future updates
@@ -61,6 +63,9 @@ Change log
 ----------
 v1.4.0
   * Added the ability to control output file format, set by config
+  * Added a subtitle suffix option to config
+  * Added Japanese parentheses to the list of filtered parentheses
+  * Added some audio extensions to the input file extension list
 
 v1.3.1
   * Fixed a bug with subtitles where some lines can be empty after filtering
