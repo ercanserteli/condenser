@@ -13,8 +13,8 @@ import re
 
 ffmpeg_cmd = "utils/ffmpeg/ffmpeg"
 ffprobe_cmd = "utils/ffmpeg/ffprobe"
-video_exts = [".mkv", ".mp4", ".webm", ".mpg", ".mp2", ".mpeg", ".mpe", ".mpv", ".ogg", ".m4p",
-              ".m4v", ".avi", ".wmv", ".mov", ".qt", ".flv", ".swf", ".mp3"]
+video_exts = [".mkv", ".mp4", ".webm", ".mpg", ".mp2", ".mpeg", ".mpe", ".mpv", ".ogg", ".m4p", ".m4v", ".avi", ".wmv",
+              ".mov", ".qt", ".flv", ".swf", ".mp3", ".wav", ".flac", ".m4a", ".aac"]
 sub_exts = ["*.srt", "*.ass", "*.ssa", "Subtitle files"]
 title = "Condenser"
 filtered_chars = ""
@@ -288,7 +288,7 @@ def main():
                 filter_parentheses = conf.get("filter_parentheses")
                 global output_format
                 output_format = conf.get("output_format")
-                global sub_suffix;
+                global sub_suffix
                 sub_suffix = conf.get("sub_suffix")
                 if type(padding) is not int or type(mulsrt_ask) is not bool:
                     raise Exception("Invalid config file")
