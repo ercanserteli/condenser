@@ -15,7 +15,7 @@ ffmpeg_cmd = "utils/ffmpeg/ffmpeg"
 ffprobe_cmd = "utils/ffmpeg/ffprobe"
 video_exts = [".mkv", ".mp4", ".webm", ".mpg", ".mp2", ".mpeg", ".mpe", ".mpv", ".ogg", ".m4p", ".m4v", ".avi", ".wmv",
               ".mov", ".qt", ".flv", ".swf", ".mp3", ".wav", ".flac", ".m4a", ".aac"]
-sub_exts = ["*.srt", "*.ass", "*.ssa", "Subtitle files"]
+sub_exts = ["*.srt", "*.ass", "*.ssa", "*.vtt", "Subtitle files"]
 title = "Condenser"
 filtered_chars = ""
 filter_parentheses = False
