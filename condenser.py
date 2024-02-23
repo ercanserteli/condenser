@@ -240,6 +240,8 @@ def condense_multi(subtitle_option, video_paths, video_names, subtitle_stream, a
     audio_index = choose_audio_stream(audio_stream, message)
 
     output_dir = op.join(parent_folder, folder_name + "_con")
+    if fixed_output_dir is not None:
+        output_dir = fixed_output_dir
     os.makedirs(output_dir, exist_ok=True)
     all_time_start = timer()
 
@@ -268,7 +270,7 @@ def condense_multi(subtitle_option, video_paths, video_names, subtitle_stream, a
 
 def main():
     temp_dir = None
-    filename = None
+    file_path = None
     if getattr(sys, 'frozen', False):
         application_path = os.path.dirname(os.path.abspath(sys.executable))
     else:
@@ -290,6 +292,8 @@ def main():
                 output_format = conf.get("output_format")
                 global sub_suffix
                 sub_suffix = conf.get("sub_suffix")
+                global fixed_output_dir
+                fixed_output_dir = conf.get("fixed_output_dir")
                 if type(padding) is not int or type(mulsrt_ask) is not bool:
                     raise Exception("Invalid config file")
                 if padding < 0:
@@ -302,32 +306,32 @@ def main():
 
         # Get video file
         if len(sys.argv) > 1:
-            filename = sys.argv[1]
+            file_path = sys.argv[1]
         else:
             msg = "Would you like to condense one video or a folder of videos?\n" +\
                 "(You can also drag and drop videos or folders directly to the executable or its shortcut)"
             answer = g.buttonbox(msg, title, ["Video", "Folder"])
             if answer == "Video":
-                filename = g.fileopenbox("Select video file", title,
+                file_path = g.fileopenbox("Select video file", title,
                                          filetypes=[["*" + e for e in video_exts] + ["Video files"]])
             elif answer == "Folder":
-                filename = g.diropenbox("Select folder", title)
+                file_path = g.diropenbox("Select folder", title)
 
-        if filename is None or not op.exists(filename):
+        if file_path is None or not op.exists(file_path):
             print("Filename is not given. Exiting")
             return
 
-        if op.isdir(filename):
-            print("Checking videos in folder:", filename)
+        if op.isdir(file_path):
+            print("Checking videos in folder:", file_path)
 
-            parent_folder, folder_name = op.split(filename)
+            parent_folder, folder_name = op.split(file_path)
             temp_dir = op.join(tempfile.gettempdir(), "condenser_temp-{}".format(int(time.time() * 1000)))
 
-            file_names = [f for f in os.listdir(filename) if op.isfile(op.join(filename, f))]
+            file_names = [f for f in os.listdir(file_path) if op.isfile(op.join(file_path, f))]
             video_names = [f for f in file_names if op.splitext(f)[1] in video_exts]
 
             print("Found {} videos out of {} files".format(len(video_names), len(file_names)))
-            video_paths = [op.join(filename, f) for f in video_names]
+            video_paths = [op.join(file_path, f) for f in video_names]
             all_streams = [probe_video(v) for v in video_paths]
             all_audio_streams, all_subtitle_streams = map(list, zip(*all_streams))
             all_audio_options = list(map(streams_to_options, all_audio_streams))
@@ -358,19 +362,23 @@ def main():
                     a_s = all_audio_streams[ids[0]]
                     condense_multi(so, vps, vns, s_s, a_s, mulsrt_ask, parent_folder, folder_name, temp_dir, padding)
         else:
-            print("Opening video:", filename)
+            print("Opening video:", file_path)
 
-            file_root, _ = os.path.splitext(filename)
-            file_folder, _ = os.path.split(filename)
+            file_root, _ = op.splitext(file_path)
+            file_folder, file_name = op.split(file_path)
             temp_dir = op.join(tempfile.gettempdir(), ".temp-{}".format(int(time.time() * 1000)))
 
-            audio_streams, subtitle_streams = probe_video(filename)
+            audio_streams, subtitle_streams = probe_video(file_path)
             os.makedirs(temp_dir)
-            srt_path = get_srt(subtitle_streams, mulsrt_ask, file_folder, filename, temp_dir)
+            srt_path = get_srt(subtitle_streams, mulsrt_ask, file_folder, file_path, temp_dir)
             audio_index = choose_audio_stream(audio_streams,
                                               'This file has multiple audio streams. Which one would you like to use?')
 
-            condense(srt_path, padding, temp_dir, filename, audio_index, file_root + "_con." + output_format)
+            if fixed_output_dir is not None:
+                os.makedirs(fixed_output_dir, exist_ok=True)
+                file_name_root, _ = op.splitext(file_name)
+                file_root = op.join(fixed_output_dir, file_name_root)
+            condense(srt_path, padding, temp_dir, file_path, audio_index, file_root + "_con." + output_format)
 
     except Exception as ex:
         print("{}: {}".format(type(ex).__name__, ex))
@@ -378,7 +386,7 @@ def main():
         print(traceback.format_exc())
         with open(op.join(application_path, "log.txt"), "a") as f:
             time_str = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-            heading = time_str + " - " + filename
+            heading = time_str + " - " + file_path
             message = heading + "\n" + "-" * len(heading) + "\n" + str(
                 ex) + "\nTraceback:\n" + traceback.format_exc() + "\n\n"
             f.write(message)

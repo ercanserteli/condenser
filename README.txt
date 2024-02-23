@@ -50,6 +50,8 @@ You can change some settings in config.json:
 
 "sub_suffix" is empty by default. If your external subs have a suffix by default (e.g. "[video_name]_retimed.srt" or "[video_name]_en.srt"), you can set it here (e.g. "_retimed" or "_en") so that the program can find the subtitle file automatically.
 
+"fixed_output_dir" is null by default. You can set it to a path string (e.g. "C:/Users/[user_name]/Condensed Audio") to save output files in this directory.
+
 Project Web Page
 ---------------
 Visit https://ercanserteli.com/condenser for further information and future updates
