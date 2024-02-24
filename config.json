@@ -4,5 +4,6 @@
   "filtered_characters": "♩♪♫♬～",
   "filter_parentheses": true,
   "output_format": "mp3",
-  "sub_suffix": ""
+  "sub_suffix": "",
+  "fixed_output_dir": null
 }
