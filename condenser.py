@@ -3,6 +3,8 @@ import os
 import os.path as op
 import sys
 import shutil
+from typing import Optional, List
+
 import pysrt
 from timeit import default_timer as timer
 import time
@@ -11,16 +13,18 @@ import json
 import tempfile
 import re
 
-ffmpeg_cmd = "utils/ffmpeg/ffmpeg"
-ffprobe_cmd = "utils/ffmpeg/ffprobe"
-video_exts = [".mkv", ".mp4", ".webm", ".mpg", ".mp2", ".mpeg", ".mpe", ".mpv", ".ogg", ".m4p", ".m4v", ".avi", ".wmv",
-              ".mov", ".qt", ".flv", ".swf", ".mp3", ".wav", ".flac", ".m4a", ".aac"]
-sub_exts = ["*.srt", "*.ass", "*.ssa", "*.vtt", "Subtitle files"]
-title = "Condenser"
-filtered_chars = ""
-filter_parentheses = False
-output_format = ""
-sub_suffix = ""
+ffmpeg_cmd: str = "utils/ffmpeg/ffmpeg"
+ffprobe_cmd: str = "utils/ffmpeg/ffprobe"
+video_exts: List[str] = [".mkv", ".mp4", ".webm", ".mpg", ".mp2", ".mpeg", ".mpe", ".mpv", ".ogg", ".m4p", ".m4v",
+                         ".avi", ".wmv", ".mov", ".qt", ".flv", ".swf", ".mp3", ".wav", ".flac", ".m4a", ".aac"]
+sub_exts: List[str] = ["*.srt", "*.ass", "*.ssa", "*.vtt", "Subtitle files"]
+title: str = "Condenser"
+filtered_chars: str = ""
+filter_parentheses: bool = False
+output_format: str = ""
+sub_suffix: str = ""
+fixed_output_dir: Optional[str] = None
+fixed_output_dir_with_subfolders: bool = True
 
 
 def check_all_equal(li):
@@ -242,7 +246,8 @@ def condense_multi(subtitle_option, video_paths, video_names, subtitle_stream, a
         # There is at least one video with no external sub
         if len(subtitle_option) == 0:
             # There are no internal subs
-            raise Exception("There are videos with no subtitles and no corresponding subtitle files:\n"+ '\n'.join(invalid_videos))
+            raise Exception(
+                "There are videos with no subtitles and no corresponding subtitle files:\n" + '\n'.join(invalid_videos))
         is_all_none = all(s is None for s in all_subtitle_paths)
         file_name_str = "all files" if is_all_none else "some files"
         sub_index = choose_subtitle_stream(subtitle_stream, mulsrt_ask, file_name_str)
@@ -250,9 +255,15 @@ def condense_multi(subtitle_option, video_paths, video_names, subtitle_stream, a
     message = 'These files have multiple audio streams. Which one would you like to use?'
     audio_index = choose_audio_stream(audio_stream, message)
 
-    output_dir = op.join(parent_folder, folder_name + "_con")
     if fixed_output_dir is not None:
-        output_dir = fixed_output_dir
+        if fixed_output_dir_with_subfolders:
+            # Create sub-folder within fixed_output_dir
+            output_dir = op.join(fixed_output_dir, folder_name + "_con")
+        else:
+            # Output directly to fixed_output_dir
+            output_dir = fixed_output_dir
+    else:
+        output_dir = op.join(parent_folder, folder_name + "_con")
     os.makedirs(output_dir, exist_ok=True)
     all_time_start = timer()
 
@@ -279,9 +290,8 @@ def condense_multi(subtitle_option, video_paths, video_names, subtitle_stream, a
     print("Finished {} files in {:.2f} seconds".format(len(video_paths), all_time_end - all_time_start))
 
 
-def main():
+def main(file_path=None):
     temp_dir = None
-    file_path = None
     if getattr(sys, 'frozen', False):
         application_path = os.path.dirname(os.path.abspath(sys.executable))
     else:
@@ -295,16 +305,36 @@ def main():
                 conf = json.load(f)
                 padding = conf.get("padding")
                 mulsrt_ask = conf.get("ask_when_multiple_srt")
-                global filtered_chars
-                filtered_chars = conf.get("filtered_characters")
-                global filter_parentheses
-                filter_parentheses = conf.get("filter_parentheses")
-                global output_format
-                output_format = conf.get("output_format")
-                global sub_suffix
-                sub_suffix = conf.get("sub_suffix")
-                global fixed_output_dir
-                fixed_output_dir = conf.get("fixed_output_dir")
+                if "filtered_characters" in conf:
+                    global filtered_chars
+                    filtered_chars = conf.get("filtered_characters")
+                if "filter_parentheses" in conf:
+                    global filter_parentheses
+                    filter_parentheses = conf.get("filter_parentheses")
+                if "output_format" in conf:
+                    global output_format
+                    output_format = conf.get("output_format")
+                if "sub_suffix" in conf:
+                    global sub_suffix
+                    sub_suffix = conf.get("sub_suffix")
+                if "fixed_output_dir" in conf:
+                    global fixed_output_dir
+                    fixed_output_dir = conf.get("fixed_output_dir")
+                if "fixed_output_dir_with_subfolders" in conf:
+                    global fixed_output_dir_with_subfolders
+                    fixed_output_dir_with_subfolders = conf.get("fixed_output_dir_with_subfolders")
+                if "use_system_ffmpeg" in conf:
+                    global ffmpeg_cmd
+                    global ffprobe_cmd
+                    if conf.get("use_system_ffmpeg"):
+                        ffmpeg_cmd = "ffmpeg"
+                        ffprobe_cmd = "ffprobe"
+                    else:
+                        if not op.isfile(ffmpeg_cmd) or not op.isfile(ffprobe_cmd):
+                            print("ffmpeg or ffprobe not found in the utils/ffmpeg folder. Will try system ffmpeg")
+                            ffmpeg_cmd = "ffmpeg"
+                            ffprobe_cmd = "ffprobe"
+
                 if type(padding) is not int or type(mulsrt_ask) is not bool:
                     raise Exception("Invalid config file")
                 if padding < 0:
@@ -316,15 +346,13 @@ def main():
             mulsrt_ask = False
 
         # Get video file
-        if len(sys.argv) > 1:
-            file_path = sys.argv[1]
-        else:
-            msg = "Would you like to condense one video or a folder of videos?\n" +\
-                "(You can also drag and drop videos or folders directly to the executable or its shortcut)"
+        if file_path is None:
+            msg = "Would you like to condense one video or a folder of videos?\n" + \
+                  "(You can also drag and drop videos or folders directly to the executable or its shortcut)"
             answer = g.buttonbox(msg, title, ["Video", "Folder"])
             if answer == "Video":
                 file_path = g.fileopenbox("Select video file", title,
-                                         filetypes=[["*" + e for e in video_exts] + ["Video files"]])
+                                          filetypes=[["*" + e for e in video_exts] + ["Video files"]])
             elif answer == "Folder":
                 file_path = g.diropenbox("Select folder", title)
 
@@ -410,4 +438,7 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) == 1:
+        main()
+    else:
+        main(sys.argv[1])
