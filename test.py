@@ -31,8 +31,8 @@ def config_set(key, val):
     if isinstance(key, str) and isinstance(val, str):
         config[key] = val
     elif isinstance(key, tuple) and isinstance(val, tuple) and len(key) == len(val):
-        for key, val in zip(key, val):
-            config[key] = val
+        for k, v in zip(key, val):
+            config[k] = v
 
     with open("config.json", "w", encoding="utf-8") as f:
         json.dump(config, f, indent=2)
@@ -58,7 +58,7 @@ class TestFilesBase(unittest.TestCase):
         restore_config()
         if self._delete_outputs:
             for filename in os.listdir(self._input_dir):
-                if f"_con." in filename:
+                if "_con." in filename:
                     os.remove(f"{self._input_dir}/{filename}")
 
     def _testFile(self, filename, output_format="mp3", out_test_dir=None):
@@ -81,7 +81,7 @@ class TestFilesBase(unittest.TestCase):
     def test1a1s(self):
         self._testFile("1a1s.mkv")
 
-    @patch('easygui.indexbox')
+    @patch("easygui.indexbox")
     def test3a1s(self, mock_indexbox):
         mock_indexbox.return_value = 2
         self._testFile("3a1s.mkv")
@@ -89,7 +89,7 @@ class TestFilesBase(unittest.TestCase):
     def test1a0s(self):
         self._testFile("1a0s.mkv")
 
-    @patch('easygui.indexbox')
+    @patch("easygui.indexbox")
     def test3a2s(self, mock_indexbox):
         mock_indexbox.side_effect = [1, 2]
         self._testFile("3a2s.mkv")
@@ -165,13 +165,13 @@ class TestFoldersBase(unittest.TestCase):
         self._createTestFolder("1a1s", ("1a1s",))
         self._testFolder("1a1s_temp")
 
-    @patch('easygui.indexbox')
+    @patch("easygui.indexbox")
     def test3a1s(self, mock_indexbox):
         mock_indexbox.return_value = 2
         self._createTestFolder("3a1s", ("3a1s",))
         self._testFolder("3a1s_temp")
 
-    @patch('easygui.indexbox')
+    @patch("easygui.indexbox")
     def test3a2s(self, mock_indexbox):
         mock_indexbox.side_effect = [1, 2]
         self._createTestFolder("3a2s", ("3a2s",))
@@ -187,7 +187,7 @@ class TestFoldersBase(unittest.TestCase):
         self._createTestFolder("audio", ("audio",), False)
         self._testFolder("audio_temp")
 
-    @patch('easygui.indexbox')
+    @patch("easygui.indexbox")
     def testMix(self, mock_indexbox):
         mock_indexbox.side_effect = [2, 1, 2]
         self._createTestFolder("mix", ("1a1s", "3a1s", "3a2s"))
@@ -208,5 +208,5 @@ class TestFoldersBase(unittest.TestCase):
         self._testFolder("1a1s_temp", out_test_dir=output_dir, subfolder=False)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

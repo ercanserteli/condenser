@@ -58,6 +58,10 @@ You can change some settings in config.json:
 "use_system_ffmpeg" is false by default. If true, the program will use the system's ffmpeg instead of the one included in the package. If you set this to true, make sure that ffmpeg is in your system's PATH.
 
 
+Development
+-----------
+Run "pre-commit install" to install the pre-commit hooks. This will make the formatter and linter run before each commit.
+
 How to build an .exe file
 ---------------
 * Install dependencies:

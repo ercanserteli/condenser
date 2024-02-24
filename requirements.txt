@@ -1,8 +1,3 @@
-altgraph==0.16.1
-chardet==3.0.4
 easygui==0.98.3
-future==0.18.3
-pefile===2023.2.7
-PyInstaller==3.6
+PyInstaller==6.4.0
 pysrt==1.1.2
-pywin32-ctypes==0.2.2

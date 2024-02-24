@@ -15,8 +15,30 @@ import re
 
 ffmpeg_cmd: str = "utils/ffmpeg/ffmpeg"
 ffprobe_cmd: str = "utils/ffmpeg/ffprobe"
-video_exts: List[str] = [".mkv", ".mp4", ".webm", ".mpg", ".mp2", ".mpeg", ".mpe", ".mpv", ".ogg", ".m4p", ".m4v",
-                         ".avi", ".wmv", ".mov", ".qt", ".flv", ".swf", ".mp3", ".wav", ".flac", ".m4a", ".aac"]
+video_exts: List[str] = [
+    ".mkv",
+    ".mp4",
+    ".webm",
+    ".mpg",
+    ".mp2",
+    ".mpeg",
+    ".mpe",
+    ".mpv",
+    ".ogg",
+    ".m4p",
+    ".m4v",
+    ".avi",
+    ".wmv",
+    ".mov",
+    ".qt",
+    ".flv",
+    ".swf",
+    ".mp3",
+    ".wav",
+    ".flac",
+    ".m4a",
+    ".aac",
+]
 sub_exts: List[str] = ["*.srt", "*.ass", "*.ssa", "*.vtt", "Subtitle files"]
 title: str = "Condenser"
 filtered_chars: str = ""
@@ -32,8 +54,9 @@ def check_all_equal(li):
 
 
 def probe_video(filename):
-    result = sp.run([ffprobe_cmd, "-show_streams", "-v", "quiet", "-print_format", "json", filename],
-                    capture_output=True)
+    result = sp.run(
+        [ffprobe_cmd, "-show_streams", "-v", "quiet", "-print_format", "json", filename], capture_output=True
+    )
     if result.returncode != 0:
         raise Exception("Could not probe video " + filename + " with ffprobe: " + str(result.stderr))
     probe = json.loads(result.stdout)
@@ -59,18 +82,19 @@ def streams_to_options(streams):
 
 
 def filter_text(text):
-    text = re.sub('<[^<]+?>', '', text)  # strip xml tags
+    text = re.sub("<[^<]+?>", "", text)  # strip xml tags
     if len(text) == 0:
         return ""
-    if filter_parentheses and \
-            ((text[0] == "(" and text[-1] == ")") or
-             (text[0] == "（" and text[-1] == "）") or
-             (text[0] == "[" and text[-1] == "]") or
-             (text[0] == "{" and text[-1] == "}")):
+    if filter_parentheses and (
+        (text[0] == "(" and text[-1] == ")")
+        or (text[0] == "（" and text[-1] == "）")
+        or (text[0] == "[" and text[-1] == "]")
+        or (text[0] == "{" and text[-1] == "}")
+    ):
         return ""
     else:
         if filtered_chars:
-            return text.translate(str.maketrans('', '', filtered_chars))
+            return text.translate(str.maketrans("", "", filtered_chars))
         else:
             return text
 
@@ -100,7 +124,7 @@ def extract_periods(srt_path, padding):
             else:
                 break
         merged_periods.append(periods[i])
-        i += (expanded + 1)
+        i += expanded + 1
 
     print("All period count: {} ({} filtered)".format(len(periods), len(subs) - len(periods)))
     print("Merged period count:", len(merged_periods))
@@ -113,9 +137,25 @@ def extract_audio_parts(periods, temp_dir, filename, audio_index):
     for i, (start, end) in enumerate(periods):
         out_path = temp_dir + "/out_{}.flac".format(i)
         out_paths.append(out_path)
-        command = [ffmpeg_cmd, '-hide_banner', '-loglevel', 'error', '-ss', str(start / 1000), '-i', filename, '-t',
-                   str((end - start) / 1000), '-map', '0:a:{}'.format(audio_index), '-c:a', 'flac',
-                   '-compression_level', '0', out_path]
+        command = [
+            ffmpeg_cmd,
+            "-hide_banner",
+            "-loglevel",
+            "error",
+            "-ss",
+            str(start / 1000),
+            "-i",
+            filename,
+            "-t",
+            str((end - start) / 1000),
+            "-map",
+            "0:a:{}".format(audio_index),
+            "-c:a",
+            "flac",
+            "-compression_level",
+            "0",
+            out_path,
+        ]
         rc = sp.call(command, shell=False)
         if rc != 0:
             raise Exception("Could not extract audio from video")
@@ -131,8 +171,20 @@ def concatenate_audio_parts(periods, temp_dir, out_paths, output_filename):
             f.write("file '{}'\n".format(out_paths[i].replace("'", "'\\''")))
 
     print("Concatenating...")
-    concat_commands = [ffmpeg_cmd, "-y", "-safe", "0", "-hide_banner", "-loglevel", "error", "-f", "concat", "-i",
-                       concat_dir, output_filename]
+    concat_commands = [
+        ffmpeg_cmd,
+        "-y",
+        "-safe",
+        "0",
+        "-hide_banner",
+        "-loglevel",
+        "error",
+        "-f",
+        "concat",
+        "-i",
+        concat_dir,
+        output_filename,
+    ]
     result = sp.run(concat_commands, capture_output=True)
     if result.returncode != 0:
         raise Exception("There was a problem during concatenation: " + str(result.stderr))
@@ -142,8 +194,9 @@ def choose_audio_stream(audio_streams, message):
     audio_index = 0
     if len(audio_streams) > 1:
         audio_options = streams_to_options(audio_streams)
-        audio_index = g.indexbox(message, 'Audio Stream', audio_options, default_choice=audio_options[audio_index],
-                                 cancel_choice="cancel")
+        audio_index = g.indexbox(
+            message, "Audio Stream", audio_options, default_choice=audio_options[audio_index], cancel_choice="cancel"
+        )
         if audio_index is None:
             raise Exception("Audio stream selection canceled. Exiting program.")
     return audio_index
@@ -154,19 +207,35 @@ def choose_subtitle_stream(subtitle_streams, mulsrt_ask, file_name_str="this fil
     if len(subtitle_streams) > 1 and mulsrt_ask:
         sub_options = streams_to_options(subtitle_streams)
         sub_index = g.indexbox(
-            'No external and multiple internal subtitles found in {}. Which one would you like to use?'.format(
-                file_name_str) +
-            ' If you want to always pick the first subtitle by default,'
+            "No external and multiple internal subtitles found in {}. Which one would you like to use?".format(
+                file_name_str
+            )
+            + " If you want to always pick the first subtitle by default,"
             ' set "ask_when_multiple_srt" to False in config.json',
-            'Subtitle Stream', sub_options, default_choice=sub_options[sub_index],
-            cancel_choice=sub_options[sub_index])
+            "Subtitle Stream",
+            sub_options,
+            default_choice=sub_options[sub_index],
+            cancel_choice=sub_options[sub_index],
+        )
     return sub_index
 
 
 def extract_srt(temp_dir, filename, sub_index):
     srt_path = op.join(temp_dir, "out.srt")
-    result = sp.run([ffmpeg_cmd, '-hide_banner', '-loglevel', 'error', '-i', filename, '-map',
-                     '0:s:{}'.format(sub_index), srt_path], capture_output=True)
+    result = sp.run(
+        [
+            ffmpeg_cmd,
+            "-hide_banner",
+            "-loglevel",
+            "error",
+            "-i",
+            filename,
+            "-map",
+            "0:s:{}".format(sub_index),
+            srt_path,
+        ],
+        capture_output=True,
+    )
     if result.returncode != 0:
         raise Exception("Could not extract subtitle with ffmpeg: " + str(result.stderr))
     return srt_path
@@ -206,8 +275,12 @@ def get_srt(subtitle_streams, mulsrt_ask, file_folder, filename, temp_dir):
             return srt_path
         else:
             # No subs in video either, asking the user
-            sub_path = g.fileopenbox("This video file has no subtitles. Select a subtitle file to continue",
-                                     title, filetypes=[sub_exts], default="{}/*".format(file_folder))
+            sub_path = g.fileopenbox(
+                "This video file has no subtitles. Select a subtitle file to continue",
+                title,
+                filetypes=[sub_exts],
+                default="{}/*".format(file_folder),
+            )
             if sub_path is None:
                 raise Exception("Video file has no subtitles and subtitle file not selected. Exiting program.")
 
@@ -238,8 +311,18 @@ def condense(srt_path, padding, temp_dir, filename, audio_index, output_filename
     print("Finished in {:.2f} seconds".format(time_end - time_start))
 
 
-def condense_multi(subtitle_option, video_paths, video_names, subtitle_stream, audio_stream, mulsrt_ask, parent_folder,
-                   folder_name, temp_dir, padding):
+def condense_multi(
+    subtitle_option,
+    video_paths,
+    video_names,
+    subtitle_stream,
+    audio_stream,
+    mulsrt_ask,
+    parent_folder,
+    folder_name,
+    temp_dir,
+    padding,
+):
     all_subtitle_paths, invalid_videos = find_matching_subtitles_for_files(video_paths)
     sub_index = 0
     if invalid_videos:
@@ -247,12 +330,13 @@ def condense_multi(subtitle_option, video_paths, video_names, subtitle_stream, a
         if len(subtitle_option) == 0:
             # There are no internal subs
             raise Exception(
-                "There are videos with no subtitles and no corresponding subtitle files:\n" + '\n'.join(invalid_videos))
+                "There are videos with no subtitles and no corresponding subtitle files:\n" + "\n".join(invalid_videos)
+            )
         is_all_none = all(s is None for s in all_subtitle_paths)
         file_name_str = "all files" if is_all_none else "some files"
         sub_index = choose_subtitle_stream(subtitle_stream, mulsrt_ask, file_name_str)
 
-    message = 'These files have multiple audio streams. Which one would you like to use?'
+    message = "These files have multiple audio streams. Which one would you like to use?"
     audio_index = choose_audio_stream(audio_stream, message)
 
     if fixed_output_dir is not None:
@@ -292,7 +376,7 @@ def condense_multi(subtitle_option, video_paths, video_names, subtitle_stream, a
 
 def main(file_path=None):
     temp_dir = None
-    if getattr(sys, 'frozen', False):
+    if getattr(sys, "frozen", False):
         application_path = os.path.dirname(os.path.abspath(sys.executable))
     else:
         application_path = os.path.dirname(os.path.abspath(__file__))
@@ -330,7 +414,10 @@ def main(file_path=None):
                         ffmpeg_cmd = "ffmpeg"
                         ffprobe_cmd = "ffprobe"
                     else:
-                        if not op.isfile(ffmpeg_cmd) or not op.isfile(ffprobe_cmd):
+                        try:
+                            sp.call([ffmpeg_cmd], stdout=sp.DEVNULL, stderr=sp.DEVNULL)
+                            sp.call([ffprobe_cmd], stdout=sp.DEVNULL, stderr=sp.DEVNULL)
+                        except FileNotFoundError:
                             print("ffmpeg or ffprobe not found in the utils/ffmpeg folder. Will try system ffmpeg")
                             ffmpeg_cmd = "ffmpeg"
                             ffprobe_cmd = "ffprobe"
@@ -342,17 +429,21 @@ def main(file_path=None):
                 if padding > 60000:
                     padding = 60000
         else:
+            print(f"Config file not found in {config_path}. Using default values")
             padding = 500
             mulsrt_ask = False
 
         # Get video file
         if file_path is None:
-            msg = "Would you like to condense one video or a folder of videos?\n" + \
-                  "(You can also drag and drop videos or folders directly to the executable or its shortcut)"
+            msg = (
+                "Would you like to condense one video or a folder of videos?\n"
+                + "(You can also drag and drop videos or folders directly to the executable or its shortcut)"
+            )
             answer = g.buttonbox(msg, title, ["Video", "Folder"])
             if answer == "Video":
-                file_path = g.fileopenbox("Select video file", title,
-                                          filetypes=[["*" + e for e in video_exts] + ["Video files"]])
+                file_path = g.fileopenbox(
+                    "Select video file", title, filetypes=[["*" + e for e in video_exts] + ["Video files"]]
+                )
             elif answer == "Folder":
                 file_path = g.diropenbox("Select folder", title)
 
@@ -377,8 +468,18 @@ def main(file_path=None):
             all_subtitle_options = list(map(streams_to_options, all_subtitle_streams))
             if check_all_equal(all_audio_options) and check_all_equal(all_subtitle_options):
                 print("Streams are consistent")
-                condense_multi(all_subtitle_options[0], video_paths, video_names, all_subtitle_streams[0],
-                               all_audio_streams[0], mulsrt_ask, parent_folder, folder_name, temp_dir, padding)
+                condense_multi(
+                    all_subtitle_options[0],
+                    video_paths,
+                    video_names,
+                    all_subtitle_streams[0],
+                    all_audio_streams[0],
+                    mulsrt_ask,
+                    parent_folder,
+                    folder_name,
+                    temp_dir,
+                    padding,
+                )
             else:
                 all_options = list(zip(all_audio_options, all_subtitle_options))
                 grouped_options = [[(0, all_options[0])]]
@@ -410,8 +511,9 @@ def main(file_path=None):
             audio_streams, subtitle_streams = probe_video(file_path)
             os.makedirs(temp_dir)
             srt_path = get_srt(subtitle_streams, mulsrt_ask, file_folder, file_path, temp_dir)
-            audio_index = choose_audio_stream(audio_streams,
-                                              'This file has multiple audio streams. Which one would you like to use?')
+            audio_index = choose_audio_stream(
+                audio_streams, "This file has multiple audio streams. Which one would you like to use?"
+            )
 
             if fixed_output_dir is not None:
                 os.makedirs(fixed_output_dir, exist_ok=True)
@@ -422,12 +524,21 @@ def main(file_path=None):
     except Exception as ex:
         print("{}: {}".format(type(ex).__name__, ex))
         import traceback
+
         print(traceback.format_exc())
         with open(op.join(application_path, "log.txt"), "a") as f:
             time_str = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
             heading = time_str + " - " + file_path
-            message = heading + "\n" + "-" * len(heading) + "\n" + str(
-                ex) + "\nTraceback:\n" + traceback.format_exc() + "\n\n"
+            message = (
+                heading
+                + "\n"
+                + "-" * len(heading)
+                + "\n"
+                + str(ex)
+                + "\nTraceback:\n"
+                + traceback.format_exc()
+                + "\n\n"
+            )
             f.write(message)
         # os.system("pause")
 
