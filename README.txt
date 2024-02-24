@@ -1,4 +1,4 @@
-Condenser v1.4.0 by Ercan Serteli
+Condenser v1.5.0 by Ercan Serteli
 ---------------------------------
 
 
@@ -52,6 +52,8 @@ You can change some settings in config.json:
 
 "fixed_output_dir" is null by default. You can set it to a path string (e.g. "C:/Users/[user_name]/Condensed Audio") to save output files in this directory.
 
+"fixed_output_dir_with_subfolders" is true by default. If you set "fixed_output_dir" and this option is true, the program will create a "_con" subfolder within the fixed dir when the input is a folder. If it is false, it will save the output files directly in the fixed dir.
+
 Project Web Page
 ---------------
 Visit https://ercanserteli.com/condenser for further information and future updates
@@ -63,6 +65,11 @@ Condenser uses ffmpeg for manipulating video and audio files.
 
 Change log
 ----------
+v1.5.0
+  * Added the ability to set a fixed output directory (thanks to wawrzenczyka)
+  * Made error logs more informative (thanks to artjomsR)
+  * Improved tests
+
 v1.4.0
   * Added the ability to control output file format, set by config
   * Added a subtitle suffix option to config
