@@ -31,7 +31,7 @@ def probe_video(filename):
     result = sp.run([ffprobe_cmd, "-show_streams", "-v", "quiet", "-print_format", "json", filename],
                     capture_output=True)
     if result.returncode != 0:
-        raise Exception("Could not probe video with ffprobe: " + str(result.stderr))
+        raise Exception("Could not probe video " + filename + " with ffprobe: " + str(result.stderr))
     probe = json.loads(result.stdout)
     streams = probe.get("streams")
     audio_streams = [s for s in streams if s.get("codec_type") == "audio"]
@@ -168,8 +168,7 @@ def extract_srt(temp_dir, filename, sub_index):
     return srt_path
 
 
-def find_same_name_sub(filename):
-    # Checking if a subtitle file exists with the same name as the video file
+def find_subtitle_with_same_name_as_file(filename):
     file_root, _ = op.splitext(filename)
     for e in sub_exts[:-1]:
         path = file_root + sub_suffix + e[1:]
@@ -178,8 +177,20 @@ def find_same_name_sub(filename):
     return None
 
 
+def find_matching_subtitles_for_files(filenames):
+    all_subtitle_paths = []
+    invalid_videos = []
+    for filename in filenames:
+        subtitle = find_subtitle_with_same_name_as_file(filename)
+        if subtitle:
+            all_subtitle_paths.append(subtitle)
+        else:
+            invalid_videos.append(filename)
+    return all_subtitle_paths, invalid_videos
+
+
 def get_srt(subtitle_streams, mulsrt_ask, file_folder, filename, temp_dir):
-    sub_path = find_same_name_sub(filename)
+    sub_path = find_subtitle_with_same_name_as_file(filename)
 
     if sub_path is None:
         # No same-name subs
@@ -225,13 +236,13 @@ def condense(srt_path, padding, temp_dir, filename, audio_index, output_filename
 
 def condense_multi(subtitle_option, video_paths, video_names, subtitle_stream, audio_stream, mulsrt_ask, parent_folder,
                    folder_name, temp_dir, padding):
-    all_subtitle_paths = list(map(find_same_name_sub, video_paths))
+    all_subtitle_paths, invalid_videos = find_matching_subtitles_for_files(video_paths)
     sub_index = 0
-    if None in all_subtitle_paths:
+    if invalid_videos:
         # There is at least one video with no external sub
         if len(subtitle_option) == 0:
             # There are no internal subs
-            raise Exception("There are videos with no subtitles and no corresponding subtitle files")
+            raise Exception("There are videos with no subtitles and no corresponding subtitle files:\n"+ '\n'.join(invalid_videos))
         is_all_none = all(s is None for s in all_subtitle_paths)
         file_name_str = "all files" if is_all_none else "some files"
         sub_index = choose_subtitle_stream(subtitle_stream, mulsrt_ask, file_name_str)
