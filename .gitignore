@@ -1,3 +1,7 @@
 /log.txt
 /test_vids/
 /utils/
+__pycache__/
+build/
+dist/
+condenser.spec

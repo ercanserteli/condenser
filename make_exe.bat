@@ -1,4 +1,4 @@
-.\venv-new\Scripts\pyinstaller.exe --add-data "config.json;." --add-data "README.txt;." --onedir -y -i "C:/Users/xerca/PycharmProjects/video-concentrator/condenser_icon.ico" "C:/Users/xerca/PycharmProjects/video-concentrator/condenser.py"
+pyinstaller --add-data "config.json;." --add-data "README.txt;." --onedir -y -i "./condenser_icon.ico" "./condenser.py"
 xcopy utils dist\condenser\utils /e /i /h
 del dist\condenser\_bz2.pyd
 del dist\condenser\_hashlib.pyd

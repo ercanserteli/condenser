@@ -34,6 +34,7 @@ How to use - Detailed
     * When the processing is done, a folder named "[folder_name]_con" will be created next to the input folder and mp3 files with the same name as the videos will be created within that folder.
     * If an error occurs, the error message is written to a log.txt file in the executable directory.
 
+
 Config
 ------
 You can change some settings in config.json:
@@ -52,6 +53,23 @@ You can change some settings in config.json:
 
 "fixed_output_dir" is null by default. You can set it to a path string (e.g. "C:/Users/[user_name]/Condensed Audio") to save output files in this directory.
 
+
+How to build an .exe file
+---------------
+* Install dependencies:
+  * using conda:
+    - create environment from env.yml:
+      conda env create -f ./env.yml
+    - activate the environment:
+      conda activate condenser-env
+  * using pip:
+    - ensure you use Python 3.7
+    - run pip install -r ./requirements.txt
+* Run build script:
+  ./make_exe.bat
+* You can find the output in the dist/condenser directory.
+
+
 Project Web Page
 ---------------
 Visit https://ercanserteli.com/condenser for further information and future updates
@@ -60,6 +78,7 @@ Visit https://ercanserteli.com/condenser for further information and future upda
 Acknowledgements
 ----------------
 Condenser uses ffmpeg for manipulating video and audio files.
+
 
 Change log
 ----------
