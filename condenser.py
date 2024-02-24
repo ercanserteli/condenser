@@ -323,6 +323,17 @@ def main(file_path=None):
                 if "fixed_output_dir_with_subfolders" in conf:
                     global fixed_output_dir_with_subfolders
                     fixed_output_dir_with_subfolders = conf.get("fixed_output_dir_with_subfolders")
+                if "use_system_ffmpeg" in conf:
+                    global ffmpeg_cmd
+                    global ffprobe_cmd
+                    if conf.get("use_system_ffmpeg"):
+                        ffmpeg_cmd = "ffmpeg"
+                        ffprobe_cmd = "ffprobe"
+                    else:
+                        if not op.isfile(ffmpeg_cmd) or not op.isfile(ffprobe_cmd):
+                            print("ffmpeg or ffprobe not found in the utils/ffmpeg folder. Will try system ffmpeg")
+                            ffmpeg_cmd = "ffmpeg"
+                            ffprobe_cmd = "ffprobe"
 
                 if type(padding) is not int or type(mulsrt_ask) is not bool:
                     raise Exception("Invalid config file")

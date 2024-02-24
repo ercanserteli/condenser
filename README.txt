@@ -54,6 +54,8 @@ You can change some settings in config.json:
 
 "fixed_output_dir_with_subfolders" is true by default. If you set "fixed_output_dir" and this option is true, the program will create a "_con" subfolder within the fixed dir when the input is a folder. If it is false, it will save the output files directly in the fixed dir.
 
+"use_system_ffmpeg" is false by default. If true, the program will use the system's ffmpeg instead of the one included in the package. If you set this to true, make sure that ffmpeg is in your system's PATH.
+
 Project Web Page
 ---------------
 Visit https://ercanserteli.com/condenser for further information and future updates
@@ -66,8 +68,9 @@ Condenser uses ffmpeg for manipulating video and audio files.
 Change log
 ----------
 v1.5.0
-  * Added the ability to set a fixed output directory (thanks to wawrzenczyka)
+  * Added the option to set a fixed output directory (thanks to wawrzenczyka)
   * Made error logs more informative (thanks to artjomsR)
+  * Added the option to use system's ffmpeg instead of the included one
   * Improved tests
 
 v1.4.0

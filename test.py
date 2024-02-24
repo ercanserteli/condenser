@@ -1,20 +1,16 @@
-import hashlib
+import inspect
 import json
-import unittest
 import os
 import shutil
-import inspect
+import unittest
 from unittest.mock import patch
 
 from condenser import main
 
 
-def get_file_md5(filename):
-    hash_md5 = hashlib.md5()
-    with open(filename, 'rb') as f:
-        for chunk in iter(lambda: f.read(4096), b""):
-            hash_md5.update(chunk)
-    return hash_md5.hexdigest()
+def are_files_similar(file_path1, file_path2, tolerance_bytes=1024):
+    """Different ffmpeg versions produce slightly different output files, so this checks the size with some tolerance"""
+    return abs(os.path.getsize(file_path1) - os.path.getsize(file_path2)) <= tolerance_bytes
 
 
 def caller_function_name():
@@ -80,8 +76,7 @@ class TestFilesBase(unittest.TestCase):
         out_true_path = f"{self._output_dir}/{filename_root}_con.{output_format}"
         self.assertTrue(os.path.exists(out_test_path), f"Output file {out_test_path} does not exist")
         self.assertTrue(os.path.exists(out_true_path), f"Output file {out_true_path} does not exist")
-        self.assertEqual(get_file_md5(out_test_path), get_file_md5(out_true_path),
-                         f"Output file {out_test_path} does not match {out_true_path}")
+        self.assertTrue(are_files_similar(out_test_path, out_true_path))
 
     def test1a1s(self):
         self._testFile("1a1s.mkv")
@@ -150,8 +145,8 @@ class TestFoldersBase(unittest.TestCase):
         for filename in os.listdir(out_test_path):
             if os.path.isfile(f"{out_test_path}/{filename}"):
                 file_base, file_ext = os.path.splitext(filename)
-                out_fn = f"{file_base}_con{file_ext}"
-                self.assertEqual(get_file_md5(f"{out_test_path}/{filename}"), get_file_md5(f"{out_true_path}/{out_fn}"))
+                out_filename = f"{file_base}_con{file_ext}"
+                self.assertTrue(are_files_similar(f"{out_test_path}/{filename}", f"{out_true_path}/{out_filename}"))
 
     def _createTestFolder(self, folder_name: str, prefix_filters: tuple, with_copies: bool = True):
         def create(base_folder):

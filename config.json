@@ -6,5 +6,6 @@
   "output_format": "mp3",
   "sub_suffix": "",
   "fixed_output_dir": null,
-  "fixed_output_dir_with_subfolders": true
+  "fixed_output_dir_with_subfolders": true,
+  "use_system_ffmpeg": false
 }
