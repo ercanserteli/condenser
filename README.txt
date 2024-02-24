@@ -71,7 +71,7 @@ How to build an .exe file
     - activate the environment:
       conda activate condenser-env
   * using pip:
-    - ensure you use Python 3.7
+    - ensure you use Python version from 3.9 to 3.12
     - run pip install -r ./requirements.txt
 * Run build script:
   ./make_exe.bat
