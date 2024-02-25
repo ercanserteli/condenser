@@ -49,6 +49,7 @@ You can change some settings in config.json:
 * "fixed_output_dir" is null by default. You can set it to a path string (e.g. "C:/Users/[user_name]/Condensed Audio") to save output files in this directory.
 * "fixed_output_dir_with_subfolders" is true by default. If you set "fixed_output_dir" and this option is true, the program will create a "_con" subfolder within the fixed dir when the input is a folder. If it is false, it will save the output files directly in the fixed dir.
 * "use_system_ffmpeg" is false by default. If true, the program will use the system's ffmpeg instead of the one included in the package. If you set this to true, make sure that ffmpeg is in your system's PATH.
+* "output_condensed_subtitles" is false by default. If true, the program will output condensed subtitles as a .srt file with the same name as the output file. 
 
 
 Development

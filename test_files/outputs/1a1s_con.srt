@@ -1,0 +1,10 @@
+1
+00:00:00,500 --> 00:00:06,570
+<font face="Open Sans Semibold" size="36"><b>We're both getting homesick,
+aren't we, Dorry?</b></font>
+
+2
+00:00:07,570 --> 00:00:14,510
+<font face="Open Sans Semibold" size="36"><b>That's why I'll beat you
+and go back to Elbaf, Broggy.</b></font>
+

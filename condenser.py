@@ -47,6 +47,7 @@ output_format: str = ""
 sub_suffix: str = ""
 fixed_output_dir: Optional[str] = None
 fixed_output_dir_with_subfolders: bool = True
+output_condensed_subtitles: bool = False
 
 
 def check_all_equal(li):
@@ -307,8 +308,32 @@ def condense(srt_path, padding, temp_dir, filename, audio_index, output_filename
     out_paths = extract_audio_parts(periods, temp_dir, filename, audio_index)
     concatenate_audio_parts(periods, temp_dir, out_paths, output_filename)
 
+    if output_condensed_subtitles:
+        condensed_srt_path = op.splitext(output_filename)[0] + ".srt"
+        condense_subtitles(periods, srt_path, condensed_srt_path)
+
     time_end = timer()
     print("Finished in {:.2f} seconds".format(time_end - time_start))
+
+
+def condense_subtitles(periods, original_srt_path, condensed_srt_path):
+    subs = pysrt.open(original_srt_path)
+    condensed_subs = pysrt.SubRipFile()
+    offset = 0  # Initialize an offset to track the condensed time
+
+    for start, end in periods:
+        end_time = end - start - offset
+        for sub in subs:
+            sub_start = sub.start.ordinal
+            sub_end = sub.end.ordinal
+            if sub_start >= start and sub_end <= end:
+                # Adjust the subtitle's start and end times
+                sub.start = pysrt.srttime.SubRipTime(milliseconds=sub_start - start + offset)
+                sub.end = pysrt.srttime.SubRipTime(milliseconds=sub_end - start + offset)
+                condensed_subs.append(sub)
+        offset += end_time  # Update the offset based on the condensed timeline
+
+    condensed_subs.save(condensed_srt_path, encoding="utf-8")
 
 
 def condense_multi(
@@ -377,9 +402,9 @@ def condense_multi(
 def main(file_path=None):
     temp_dir = None
     if getattr(sys, "frozen", False):
-        application_path = os.path.dirname(os.path.abspath(sys.executable))
+        application_path = op.dirname(op.abspath(sys.executable))
     else:
-        application_path = os.path.dirname(os.path.abspath(__file__))
+        application_path = op.dirname(op.abspath(__file__))
 
     try:
         # Load config
@@ -421,6 +446,9 @@ def main(file_path=None):
                             print("ffmpeg or ffprobe not found in the utils/ffmpeg folder. Will try system ffmpeg")
                             ffmpeg_cmd = "ffmpeg"
                             ffprobe_cmd = "ffprobe"
+                if "output_condensed_subtitles" in conf:
+                    global output_condensed_subtitles
+                    output_condensed_subtitles = conf.get("output_condensed_subtitles")
 
                 if type(padding) is not int or type(mulsrt_ask) is not bool:
                     raise Exception("Invalid config file")

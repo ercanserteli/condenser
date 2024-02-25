@@ -1,0 +1,36 @@
+1
+00:00:00,500 --> 00:00:04,240
+<font face="Cabin" size="78"><b>has been vaporized into nothing. I repeat...</b></font>
+
+2
+00:00:04,240 --> 00:00:08,460
+<font face="Cabin" size="78"><b>Will we have only a crescent moon to look at for the rest of our lives?{lol this doesn't like a very big problem the way she phrased it}</b></font>
+
+3
+00:00:09,460 --> 00:00:12,540
+<font face="Cabin" size="78"><b><i>And the second was his arrival.</i></b></font>
+
+4
+00:00:12,540 --> 00:00:14,130
+<font face="Cabin" size="78"><b>How do you do?</b></font>
+
+5
+00:00:14,740 --> 00:00:17,340
+<font face="Cabin" size="78"><b>I'm the one who tore that chunk out of your moon.</b></font>
+
+6
+00:00:09,380 --> 00:00:11,960
+<font face="Cabin" size="78"><b>I plan to do the same to the Earth next year.</b></font>
+
+7
+00:00:11,960 --> 00:00:13,880
+<font face="Cabin" size="78"><b>But until then, I'll be your teacher.</b></font>
+
+8
+00:00:13,880 --> 00:00:15,510
+<font face="Cabin" size="78"><b>Nice to meet you.</b></font>
+
+9
+00:00:07,630 --> 00:00:09,930
+<font face="Cabin" size="78"><b><i>There are at </i>least<i> six things wrong with this picture!</i></b></font>
+

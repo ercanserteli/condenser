@@ -28,9 +28,9 @@ def config_set(key, val):
     with open("config.json", "r", encoding="utf-8") as f:
         config = json.load(f)
 
-    if isinstance(key, str) and isinstance(val, str):
+    if isinstance(key, str):
         config[key] = val
-    elif isinstance(key, tuple) and isinstance(val, tuple) and len(key) == len(val):
+    elif isinstance(key, tuple) and isinstance(val, tuple):
         for k, v in zip(key, val):
             config[k] = v
 
@@ -61,14 +61,17 @@ class TestFilesBase(unittest.TestCase):
                 if "_con." in filename:
                     os.remove(f"{self._input_dir}/{filename}")
 
-    def _testFile(self, filename, output_format="mp3", out_test_dir=None):
+    def _testFile(self, filename, output_formats=("mp3",), out_test_dir=None):
         print(caller_function_name())
         try:
             main(f"{self._input_dir}/{filename}")
         except Exception as e:
             self.fail(str(e))
 
-        # Compare hash of output file with the true output file
+        for output_format in output_formats:
+            self._checkOutput(filename, output_format, out_test_dir)
+
+    def _checkOutput(self, filename, output_format="mp3", out_test_dir=None):
         if out_test_dir is None:
             out_test_dir = self._input_dir
         filename_root = os.path.splitext(filename)[0]
@@ -99,13 +102,17 @@ class TestFilesBase(unittest.TestCase):
 
     def testFlacOutput(self):
         config_set("output_format", "flac")
-        self._testFile("1a0s.mkv", "flac")
+        self._testFile("1a0s.mkv", ("flac",))
 
     def testFixedOutputDir(self):
         current_directory = os.getcwd()
         output_dir = os.path.join(current_directory, "test_out")
         config_set("fixed_output_dir", output_dir)
         self._testFile("1a0s.mkv", out_test_dir=output_dir)
+
+    def testSubtitleOutput(self):
+        config_set("output_condensed_subtitles", True)
+        self._testFile("1a0s.mkv", ("mp3", "srt"))
 
 
 class TestFoldersBase(unittest.TestCase):
@@ -135,6 +142,9 @@ class TestFoldersBase(unittest.TestCase):
         except Exception as e:
             self.fail(str(e))
 
+        self._checkOutput(folder_name, out_test_dir, subfolder)
+
+    def _checkOutput(self, folder_name, out_test_dir=None, subfolder=True):
         # Compare hash of output files with the true output files
         if out_test_dir is None:
             out_test_dir = self._input_dir
@@ -206,6 +216,13 @@ class TestFoldersBase(unittest.TestCase):
         output_dir = os.path.join(current_directory, "test_out")
         config_set(("fixed_output_dir", "fixed_output_dir_with_subfolders"), (output_dir, False))
         self._testFolder("1a1s_temp", out_test_dir=output_dir, subfolder=False)
+
+    @patch("easygui.indexbox")
+    def testSubtitleOutput(self, mock_indexbox):
+        mock_indexbox.side_effect = [2, 1, 2]
+        config_set("output_condensed_subtitles", True)
+        self._createTestFolder("mix", ("1a1s", "3a1s", "3a2s"))
+        self._testFolder("mix_temp")
 
 
 if __name__ == "__main__":
