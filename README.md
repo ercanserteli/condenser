@@ -91,7 +91,11 @@ v1.5.0
   * Added the option to set a fixed output directory (thanks to wawrzenczyka)
   * Made error logs more informative (thanks to artjomsR)
   * Added the option to use system's ffmpeg instead of the included one
-  * Improved tests
+  * Added the option to output condensed subtitles
+  * Updated the icon 
+  * Improved the tests and overall code quality
+  * Updated python version to 3.12
+  * Updated ffmpeg version to the latest stable release
 
 v1.4.0
   * Added the ability to control output file format, set by config
