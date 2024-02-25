@@ -3,6 +3,8 @@
 Condenser
 =========
 
+[![codecov](https://codecov.io/gh/ercanserteli/video-condenser/graph/badge.svg?token=QJZRHMKFKW)](https://codecov.io/gh/ercanserteli/video-condenser)
+
 What is this?
 -------------
 Condenser allows you to extract speech audio from video files, based on subtitle timings. This is mainly supposed to be used for passive immersion, where you are listening to the audio of something you have already watched. By omitting the audio outside of speech, it increases the language per second that you are getting exposed to.

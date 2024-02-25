@@ -41,3 +41,5 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           slug: ercanserteli/video-condenser
+          flags: python-${{ matrix.python-version }}
+          name: codecov-${{ matrix.python-version }}
