@@ -33,6 +33,11 @@ jobs:
         run: |
           black --check $(git ls-files '*.py')
           flake8 $(git ls-files '*.py')
-      - name: Run tests
+      - name: Run tests with coverage
         run: |
-          python -m unittest test.py
+          coverage run -m unittest test.py
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4.0.1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          slug: ercanserteli/video-condenser
