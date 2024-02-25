@@ -1,4 +1,4 @@
-pyinstaller --onedir -y -i "./condenser_icon.ico" "./condenser.py"
+pyinstaller --onedir -y -i "./condenser_icon.png" "./condenser.py"
 xcopy utils dist\condenser\utils /e /i /h
 copy config.json dist\condenser\config.json
 copy README.txt dist\condenser\README.txt

@@ -1,3 +1,4 @@
 easygui==0.98.3
 PyInstaller==6.4.0
 pysrt==1.1.2
+pillow==10.2.0
