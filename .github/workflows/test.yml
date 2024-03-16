@@ -32,7 +32,7 @@ jobs:
       - name: Run formatter and linter
         run: |
           ruff check $(git ls-files '*.py')
-          ruff-format $(git ls-files '*.py')
+          ruff format $(git ls-files '*.py')
       - name: Run tests with coverage
         run: |
           coverage run -m unittest test.py
