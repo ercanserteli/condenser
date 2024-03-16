@@ -3,7 +3,7 @@
 Condenser
 =========
 
-[![codecov](https://codecov.io/gh/ercanserteli/video-condenser/graph/badge.svg?token=QJZRHMKFKW)](https://codecov.io/gh/ercanserteli/video-condenser)
+[![codecov](https://codecov.io/gh/ercanserteli/condenser/graph/badge.svg?token=QJZRHMKFKW)](https://codecov.io/gh/ercanserteli/video-condenser)
 
 What is this?
 -------------
@@ -76,7 +76,7 @@ How to build an .exe file
 
 Page Links
 ----------
-* Code repository: https://github.com/ercanserteli/video-condenser
+* Code repository: https://github.com/ercanserteli/condenser
 * Project page: https://ercanserteli.com/condenser
 
 

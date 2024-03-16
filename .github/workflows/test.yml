@@ -40,6 +40,6 @@ jobs:
         uses: codecov/codecov-action@v4.0.1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          slug: ercanserteli/video-condenser
+          slug: ercanserteli/condenser
           flags: python-${{ matrix.python-version }}
           name: codecov-${{ matrix.python-version }}
