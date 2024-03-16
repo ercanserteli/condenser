@@ -31,7 +31,7 @@ def config_set(key, val):
     if isinstance(key, str):
         config[key] = val
     elif isinstance(key, tuple) and isinstance(val, tuple):
-        for k, v in zip(key, val):
+        for k, v in zip(key, val, strict=True):
             config[k] = v
 
     with open("config.json", "w", encoding="utf-8") as f:

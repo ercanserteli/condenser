@@ -31,8 +31,8 @@ jobs:
           sudo apt-get update && sudo apt-get install -y ffmpeg
       - name: Run formatter and linter
         run: |
-          black --check $(git ls-files '*.py')
-          flake8 $(git ls-files '*.py')
+          ruff check $(git ls-files '*.py')
+          ruff-format $(git ls-files '*.py')
       - name: Run tests with coverage
         run: |
           coverage run -m unittest test.py
