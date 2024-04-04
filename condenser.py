@@ -57,6 +57,7 @@ sub_suffix: str = ""
 fixed_output_dir: Optional[str] = None
 fixed_output_dir_with_subfolders: bool = True
 output_condensed_subtitles: bool = False
+output_condensed_lrc: bool = False
 padding: int = 500
 mulsrt_ask: bool = False
 
@@ -319,10 +320,14 @@ def condense(srt_path: str, temp_dir: str, filename: str, audio_index: int, outp
     periods = extract_periods(srt_path)
     out_paths = extract_audio_parts(periods, temp_dir, filename, audio_index)
     concatenate_audio_parts(periods, temp_dir, out_paths, output_filename)
-
+    if output_condensed_lrc and not output_condensed_subtitles:
+        print("no srt file, change the config.json")
+        return
     if output_condensed_subtitles:
         condensed_srt_path = op.splitext(output_filename)[0] + ".srt"
         condense_subtitles(periods, srt_path, condensed_srt_path)
+        if output_condensed_lrc:
+            srt_file_to_irc(condensed_srt_path)
 
     time_end = timer()
     print("Finished in {:.2f} seconds".format(time_end - time_start))
@@ -333,19 +338,17 @@ def condense_subtitles(periods: List[List[int]], original_srt_path: str, condens
     condensed_subs = pysrt.SubRipFile()
     offset = 0  # Initialize an offset to track the condensed time
 
-    for period_start, period_end in periods:
+    for start, end in periods:
+        end_time = end - start# 9509 - 3796 - 0 #  - offset
         for sub in subs:
             sub_start = sub.start.ordinal
             sub_end = sub.end.ordinal
-            if sub_start >= period_start and sub_end <= period_end:
+            if sub_start >= start and sub_end <= end:
                 # Adjust the subtitle's start and end times
-                sub.start = pysrt.srttime.SubRipTime(milliseconds=sub_start - period_start + offset)
-                sub.end = pysrt.srttime.SubRipTime(milliseconds=sub_end - period_start + offset)
+                sub.start = pysrt.srttime.SubRipTime(milliseconds=sub_start - start + offset) # 4296 - 3796 + 0
+                sub.end = pysrt.srttime.SubRipTime(milliseconds=sub_end - start + offset) # 7800 - 3796 + 0
                 condensed_subs.append(sub)
-
-        # Update the offset based on the condensed timeline
-        period_duration = period_end - period_start
-        offset += period_duration
+        offset += end_time  # Update the offset based on the condensed timeline
 
     condensed_subs.save(condensed_srt_path, encoding="utf-8")
 
@@ -469,6 +472,9 @@ def main(file_path: Optional[str] = None):
                 if "output_condensed_subtitles" in conf:
                     global output_condensed_subtitles
                     output_condensed_subtitles = conf.get("output_condensed_subtitles")
+                if "output_condensed_lrc" in conf:
+                    global output_condensed_lrc
+                    output_condensed_lrc = conf.get("output_condensed_lrc")
 
         # Get video file
         if file_path is None:
@@ -572,6 +578,38 @@ def main(file_path: Optional[str] = None):
         if temp_dir is not None:
             shutil.rmtree(temp_dir, ignore_errors=True)
 
+"""
+ttt revised srt to lrc function
+"""
+SRT_BLOCK_REGEX = re.compile(
+        r'(\d+)[^\S\r\n]*[\r\n]+'
+        r'(\d{2}:\d{2}:\d{2},\d{3,4})[^\S\r\n]*-->[^\S\r\n]*(\d{2}:\d{2}:\d{2},\d{3,4})[^\S\r\n]*[\r\n]+'
+        r'([\s\S]*)')
+
+err_info = []
+
+def srt_block_to_irc(block):
+    match = SRT_BLOCK_REGEX.search(block)
+    if not match:
+        return None
+    num, ts, te, content = match.groups()
+    ts = ts[3:-1].replace(',', '.')
+    te = te[3:-1].replace(',', '.')
+    co = content.replace('\n', ' ')
+    return '[%s]%s\n[%s]\n' % (ts, co, te)
+
+
+def srt_file_to_irc(fname):
+    with open(fname, encoding='utf8') as file_in:
+        str_in = file_in.read()
+        blocks_in = str_in.replace('\r\n', '\n').split('\n\n')
+        blocks_out = [srt_block_to_irc(block) for block in blocks_in]
+        if not all(blocks_out):
+            err_info.append((fname, blocks_out.index(None), blocks_in[blocks_out.index(None)]))
+        blocks_out = filter(None, blocks_out)
+        str_out = ''.join(blocks_out)
+        with open(fname.replace('srt', 'lrc'), 'w', encoding='utf8') as file_out:
+            file_out.write(str_out)
 
 if __name__ == "__main__":
     if len(sys.argv) == 1:
