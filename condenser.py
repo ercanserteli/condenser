@@ -338,17 +338,19 @@ def condense_subtitles(periods: List[List[int]], original_srt_path: str, condens
     condensed_subs = pysrt.SubRipFile()
     offset = 0  # Initialize an offset to track the condensed time
 
-    for start, end in periods:
-        end_time = end - start# 9509 - 3796 - 0 #  - offset
+    for period_start, period_end in periods:
         for sub in subs:
             sub_start = sub.start.ordinal
             sub_end = sub.end.ordinal
-            if sub_start >= start and sub_end <= end:
+            if sub_start >= period_start and sub_end <= period_end:
                 # Adjust the subtitle's start and end times
-                sub.start = pysrt.srttime.SubRipTime(milliseconds=sub_start - start + offset) # 4296 - 3796 + 0
-                sub.end = pysrt.srttime.SubRipTime(milliseconds=sub_end - start + offset) # 7800 - 3796 + 0
+                sub.start = pysrt.srttime.SubRipTime(milliseconds=sub_start - period_start + offset)
+                sub.end = pysrt.srttime.SubRipTime(milliseconds=sub_end - period_start + offset)
                 condensed_subs.append(sub)
-        offset += end_time  # Update the offset based on the condensed timeline
+
+        # Update the offset based on the condensed timeline
+        period_duration = period_end - period_start
+        offset += period_duration
 
     condensed_subs.save(condensed_srt_path, encoding="utf-8")
 
