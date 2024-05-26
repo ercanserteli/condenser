@@ -88,6 +88,10 @@ Condenser uses ffmpeg for manipulating video and audio files.
 
 Change log
 ----------
+v1.6.0
+  * Fixed a bug with timestamps when using output_condensed_subtitles
+  * Added LRC format condensed subtitle output option via condensed_subtitles_format (thanks to Ttixan) 
+
 v1.5.0
   * Added the option to set a fixed output directory (thanks to wawrzenczyka)
   * Made error logs more informative (thanks to artjomsR)
