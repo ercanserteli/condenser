@@ -1,13 +1,13 @@
 {
   "padding": 500,
   "ask_when_multiple_srt": true,
-  "filtered_characters": "♩♪♫♬～〜",
+  "filtered_characters": "\u2669\u266a\u266b\u266c\uff5e\u301c",
   "filter_parentheses": true,
   "output_format": "mp3",
   "sub_suffix": "",
   "fixed_output_dir": null,
   "fixed_output_dir_with_subfolders": true,
   "use_system_ffmpeg": false,
-  "output_condensed_subtitles": true,
-  "output_condensed_lrc": true
+  "output_condensed_subtitles": false,
+  "condensed_subtitles_format": "srt"
 }

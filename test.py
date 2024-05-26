@@ -127,6 +127,10 @@ class TestFiles(unittest.TestCase):
         config_set("output_condensed_subtitles", True)
         self._testFile("1a0s.mkv", ("mp3", "srt"))
 
+    def testLrcSubtitleOutput(self):
+        config_set(("output_condensed_subtitles", "condensed_subtitles_format"), (True, "lrc"))
+        self._testFile("1a0s.mkv", ("mp3", "lrc"))
+
     @patch("easygui.fileopenbox")
     @patch("easygui.buttonbox")
     def testWithGUISelection(self, mock_buttonbox, mock_fileopenbox):

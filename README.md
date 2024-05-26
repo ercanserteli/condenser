@@ -43,15 +43,16 @@ Config
 You can change some settings in config.json:
 
 * "padding" is the amount of time that is added to the beginning and end of each subtitle period before extraction. The default is 500 ms and it works pretty well. Too short of a padding may slow down processing since the program merges overlapping periods before extracting audio. Also it may not give enough time to get context into what is happening in each line, making it less comprehensible.
-* "ask_when_multiple_srt" is False by default, which means it will pick the default (first) subtitle in a video file if it has multiple subtitles embedded. This is normally not a problem, but some videos may have strange subtitles put as the first one, such as "commentary" or "songs only". In this case, change this option to True and the program will ask which subtitle to use.
+* "ask_when_multiple_srt" is false by default, which means it will pick the default (first) subtitle in a video file if it has multiple subtitles embedded. This is normally not a problem, but some videos may have strange subtitles put as the first one, such as "commentary" or "songs only". In this case, change this option to true and the program will ask which subtitle to use.
 * "filtered_characters" is a set of characters to filter. If a subtitle line consists only of these characters, that line is ignored in the output.
-* "filter_parentheses" is True by default, which means it ignores subtitle lines that are completely enclosed in parentheses (including brackets and curly braces)
+* "filter_parentheses" is true by default, which means it ignores subtitle lines that are completely enclosed in parentheses (including brackets and curly braces)
 * "output_format" is set to "mp3" by default, but supports every output format supported by ffmpeg. Formats of note are "flac" as it is lossless, and "aac" since it supports higher quality audio at the same file size as mp3. For a complete list see ffmpeg's documentation.
 * "sub_suffix" is empty by default. If your external subs have a suffix by default (e.g. "[video_name]_retimed.srt" or "[video_name]_en.srt"), you can set it here (e.g. "_retimed" or "_en") so that the program can find the subtitle file automatically.
 * "fixed_output_dir" is null by default. You can set it to a path string (e.g. "C:/Users/[user_name]/Condensed Audio") to save output files in this directory.
 * "fixed_output_dir_with_subfolders" is true by default. If you set "fixed_output_dir" and this option is true, the program will create a "_con" subfolder within the fixed dir when the input is a folder. If it is false, it will save the output files directly in the fixed dir.
 * "use_system_ffmpeg" is false by default. If true, the program will use the system's ffmpeg instead of the one included in the package. If you set this to true, make sure that ffmpeg is in your system's PATH.
-* "output_condensed_subtitles" is false by default. If true, the program will output condensed subtitles as a .srt file with the same name as the output file. 
+* "output_condensed_subtitles" is false by default. If true, the program will output condensed subtitles as a .srt or .lrc file with the same name as the output file. 
+* "condensed_subtitles_format" is "srt" by default. It can either be "srt" or "lrc". Determines the format of "output_condensed_subtitles". Has no effect if "output_condensed_subtitles" is false.
 
 
 Development
