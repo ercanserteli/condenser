@@ -507,7 +507,7 @@ def main(file_path: Optional[str] = None):
                     supported_formats = ["srt", "lrc"]
                     if condensed_subtitles_format not in supported_formats:
                         msg = f"condensed_subtitles_format = {condensed_subtitles_format} is not supported"
-                        ", must be one of {supported_formats}"
+                        f", must be one of {supported_formats}"
                         raise ValueError(msg)
 
         # Get video file
